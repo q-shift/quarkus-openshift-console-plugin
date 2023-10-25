@@ -3,16 +3,16 @@
     "type": "console.page/route",
     "properties": {
       "exact": true,
-      "path": "/example",
-      "component": { "$codeRef": "ExamplePage" }
+      "path": "/quarkus",
+      "component": { "$codeRef": "QuarkusPage" }
     }
   },
   {
     "type": "console.navigation/href",
     "properties": {
-      "id": "example",
-      "name": "%plugin__console-plugin-template~Plugin Example%",
-      "href": "/example",
+      "id": "quarkus",
+      "name": "%plugin__quarkus-openshift-console-plugin~Plugin Home%",
+      "href": "/quarkus",
       "perspective": "admin",
       "section": "home"
     }

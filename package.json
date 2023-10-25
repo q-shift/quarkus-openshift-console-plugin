@@ -1,8 +1,8 @@
 {
-  "name": "console-plugin-template",
+  "name": "quarkus-openshift-console-plugin",
   "version": "0.0.1",
   "private": true,
-  "repository": "git@github.com:spadgett/console-plugin-template.git",
+  "repository": "git@github.com:iocanel/quarkus-openshift-console-plugin.git",
   "license": "Apache-2.0",
   "scripts": {
     "clean": "rm -rf dist",
@@ -63,12 +63,12 @@
     "webpack-dev-server": "^4.7.4"
   },
   "consolePlugin": {
-    "name": "console-plugin-template",
+    "name": "quarkus-openshift-console-plugin",
     "version": "0.0.1",
-    "displayName": "OpenShift Console Plugin Template",
-    "description": "Template project for OpenShift console plugins. Edit package.json to change this message and the plugin name.",
+    "displayName": "Quarkus OpenShift Console Plugin",
+    "description": "Quarkus plugin for the OpenShift Console",
     "exposedModules": {
-      "ExamplePage": "./components/ExamplePage"
+      "QuarkusPage": "./components/QuarkusPage"
     },
     "dependencies": {
       "@console/pluginAPI": "*"
