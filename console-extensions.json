@@ -1,20 +1,38 @@
 [
+ {
+    "type": "console.flag/hookProvider",
+    "properties": {
+      "handler": { "$codeRef": "quarkusActions.enableQuarkusPlugin" }
+    }
+  },
   {
     "type": "console.page/route",
     "properties": {
       "exact": true,
       "path": "/quarkus",
-      "component": { "$codeRef": "QuarkusPage" }
+      "component": { "$codeRef": "QuarkusHomePage" }
+    }
+  },
+  {
+    "type": "console.navigation/section",
+    "properties": {
+      "perspective": "dev",
+      "id": "quarkus",
+      "name": "%quarkus-plugin~Quarkus%",
+      "dataAttributes": { "data-quickstart-id": "qs-nav-quarkus" },
+    },
+    "flags": {
+      "required": ["OPENSHIFT_QUARKUS"]
     }
   },
   {
     "type": "console.navigation/href",
     "properties": {
-      "id": "quarkus",
-      "name": "%plugin__quarkus-openshift-console-plugin~Plugin Home%",
+      "id": "quarkusHome",
+      "name": "%quarkus-plugin~Home%",
       "href": "/quarkus",
-      "perspective": "admin",
-      "section": "home"
+      "perspective": "dev",
+      "section": "quarkus"
     }
   }
 ]

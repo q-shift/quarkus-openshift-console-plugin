@@ -1,5 +1,5 @@
 {
-  "name": "quarkus-openshift-console-plugin",
+  "name": "quarkus-plugin",
   "version": "0.0.1",
   "private": true,
   "repository": "git@github.com:iocanel/quarkus-openshift-console-plugin.git",
@@ -21,7 +21,7 @@
   },
   "devDependencies": {
     "@cypress/webpack-preprocessor": "^5.15.5",
-    "@openshift-console/dynamic-plugin-sdk": "0.0.12",
+    "@openshift-console/dynamic-plugin-sdk": "^0.0.21",
     "@openshift-console/dynamic-plugin-sdk-webpack": "0.0.7",
     "@patternfly/react-core": "4.221.3",
     "@types/node": "^18.0.0",
@@ -68,7 +68,8 @@
     "displayName": "Quarkus OpenShift Console Plugin",
     "description": "Quarkus plugin for the OpenShift Console",
     "exposedModules": {
-      "QuarkusPage": "./components/QuarkusPage"
+      "QuarkusHomePage": "./pages/QuarkusHomePage",
+      "quarkusActions": "./actions"
     },
     "dependencies": {
       "@console/pluginAPI": "*"
