@@ -1,20 +1,26 @@
 [
+ {
+    "type": "console.flag/hookProvider",
+    "properties": {
+      "handler": { "$codeRef": "quarkusActions.enableQuarkusPlugin" }
+    }
+  },
   {
     "type": "console.page/route",
     "properties": {
       "exact": true,
-      "path": "/example",
-      "component": { "$codeRef": "ExamplePage" }
+      "path": "/quarkus",
+      "component": { "$codeRef": "QuarkusHomePage" }
     }
   },
   {
     "type": "console.navigation/href",
     "properties": {
-      "id": "example",
-      "name": "%plugin__console-plugin-template~Plugin Example%",
-      "href": "/example",
-      "perspective": "admin",
-      "section": "home"
+      "id": "quarkusHome",
+      "name": "%quarkus-plugin~Quarkus%",
+      "href": "/quarkus",
+      "perspective": "dev",
+      "section": "resources"
     }
   }
 ]
