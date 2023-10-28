@@ -74,5 +74,8 @@
     "dependencies": {
       "@console/pluginAPI": "*"
     }
+  },
+  "dependencies": {
+    "@patternfly/react-table": "^5.1.1"
   }
 }
