@@ -73,3 +73,16 @@ In the developer perpective the Quarkus section is now shown:
 [![The Quarkus Plugin Home](screenshots/home.png)](screenshots/home.png)
 
 
+# Development notes
+
+The frontend is able to retrieve information from the console using the following APIs:
+
+## Kubernetes API /api/kubernetes
+**Examples**:
+  - /api/kubernetes/apis/apps/v1/namespaces/<namespace>/deployments
+  - /api/kubernetes/apis/apps.openshift.io/v1/namespaces/<namespace>/deploymentconfigs
+
+## Prometheus API /api/prometheus
+
+**Examples**:
+- /api/prometheus/api/v1/query_range
