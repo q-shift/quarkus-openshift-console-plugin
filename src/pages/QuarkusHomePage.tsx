@@ -3,8 +3,6 @@ import Helmet from 'react-helmet';
 import {
   Page,
   PageSection,
-  Text,
-  TextContent,
   Title,
 } from '@patternfly/react-core';
 import './quarkus.css';
@@ -45,25 +43,10 @@ export default function QuarkusPage() {
       </Helmet>
       <Page>
         <PageSection variant="light">
-          <Title headingLevel="h1">{t('Hello, Quarkus!')}</Title>
+          <Title headingLevel="h1">{t('Quarkus Applications')}</Title>
         </PageSection>
         <PageSection variant="light">
-          <TextContent>
-            <Text component="p">
-              <span className="console-plugin-template__nice">
-                {t('Nice!')}
-              </span>{' '}
-              {t('The Quarkus plugin is working.')}
-            </Text>
-            <Text component="p">
-              {t(
-                'This is the home page of the Quarkus OpenShift Console plugin.'
-              )}
-              <code>{t('exposedModules')}</code>{' '}
-              {t('in package.json mapping the reference to the module.')}
-              <QuarkusApplicationList apps={quarkusApplications} />
-            </Text>
-          </TextContent>
+        <QuarkusApplicationList apps={quarkusApplications} />
         </PageSection>
       </Page>
     </>
