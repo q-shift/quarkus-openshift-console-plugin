@@ -36,3 +36,8 @@ docker build -t docker.io/iocanel/quarkus-openshift-console-plugin:latest .
 oc new-project plugin-quarkus-openshift-console-plugin
 helm upgrade -i  quarkus-openshift-console-plugin charts/openshift-console-plugin --namespace plugin-quarkus-openshift-console-plugin --set plugin.image=docker.io/iocanel/quarkus-openshift-console-plugin:latest
 ```
+
+# The Quarkus Tab
+
+In the developer perpective the Quarkus section is now shown:
+[![The Quarkus Plugin Home](screenshots/home.png)](screenshots/home.png)
