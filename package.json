@@ -1,5 +1,5 @@
 {
-  "name": "quarkus-plugin",
+  "name": "quarkus-openshift-console-plugin",
   "version": "0.0.1",
   "private": true,
   "repository": "git@github.com:iocanel/quarkus-openshift-console-plugin.git",
