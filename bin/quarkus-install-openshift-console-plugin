@@ -1,0 +1,39 @@
+#!/bin/bash
+TOKEN=""
+SERVER=""
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --token)
+      TOKEN="$2"
+      shift # past argument
+      shift # past value
+      ;;
+    --server)
+      SERVER_URL="$2"
+      shift # past argument
+      shift # past value
+      ;;
+    --token=*)
+      TOKEN=`echo $1 | sed -e 's/^[^=]*=//g'`
+      shift # past argument
+      ;;
+    --server=*)
+      SERVER=`echo $1 | sed -e 's/^[^=]*=//g'`
+      shift # past argument
+      ;;
+    -*|--*)
+      echo "Unknown option $1"
+      exit 1
+      ;;
+    *)
+      POSITIONAL_ARGS+=("$1") # save positional arg
+      shift # past argument
+      ;;
+  esac
+done
+
+echo "Login to server: $SERVER using token: $TOKEN."
+
+oc login --token=$TOKEN --server=$SERVER
+helm upgrade -i quarkus-openshift-console-plugin charts/openshift-console-plugin --namespace plugin-quarkus-openshift-console-plugin --set plugin.image=docker.io/iocanel/quarkus-openshift-console-plugin:latest

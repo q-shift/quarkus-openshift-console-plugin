@@ -52,7 +52,24 @@ oc new-project plugin-quarkus-openshift-console-plugin
 helm upgrade -i  quarkus-openshift-console-plugin charts/openshift-console-plugin --namespace plugin-quarkus-openshift-console-plugin --set plugin.image=docker.io/iocanel/quarkus-openshift-console-plugin:latest
 ```
 
+### Deploying the plugin using the Quarkus CLI
+
+This project provides a shell script that logs in to the cluster and installs the plugin in a single step.
+This script can be installed to the Quarkus CLI as a plugin:
+
+```sh
+quakrus plug add bin/quarkus-install-openshift-console-plugin
+```
+
+Then it can be used:
+
+```sh
+quarkus install-openshift-console-plugin --token=<token> --server=<server url>
+```
+
 # The Quarkus Tab
 
 In the developer perpective the Quarkus section is now shown:
 [![The Quarkus Plugin Home](screenshots/home.png)](screenshots/home.png)
+
+
