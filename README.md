@@ -31,8 +31,23 @@ Navigate to <http://localhost:9000/example> to see the running plugin.
 
 # Deployment to OpenShift
 
+To deploy the console plugin to an actual [OpenShift](https://www.redhat.com/en/technologies/cloud-computing/openshift) cluster the following are needed:
+
+- [oc](https://console.redhat.com/openshift/downloads)
+- [helm](https://helm.sh)
+
+### Building the images locally
+
 ```sh
 docker build -t docker.io/iocanel/quarkus-openshift-console-plugin:latest .
+docker push docker.io/iocanel/quarkus-openshift-console-plugin:latest
+```
+
+**Note**: The image `docker.io/iocanel/quarkus-openshift-console-plguin:latest` is published so it can be pulled instead.
+
+### Deploying the plugin using Helm
+
+```sh
 oc new-project plugin-quarkus-openshift-console-plugin
 helm upgrade -i  quarkus-openshift-console-plugin charts/openshift-console-plugin --namespace plugin-quarkus-openshift-console-plugin --set plugin.image=docker.io/iocanel/quarkus-openshift-console-plugin:latest
 ```
