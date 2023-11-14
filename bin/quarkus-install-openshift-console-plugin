@@ -33,7 +33,13 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-echo "Login to server: $SERVER using token: $TOKEN."
+if [ -n "$TOKEN" ] && [ -n "$SERVER" ]; then
+  echo "Login to server: $SERVER using token: $TOKEN."
+  oc login --token=$TOKEN --server=$SERVER
+fi
 
-oc login --token=$TOKEN --server=$SERVER
+EXISTING_PROJECT=`oc get projects | grep plugin-quarkus-openshift-console-plugin`
+if [ -z "$EXISTING_PROJECT" ]; then
+  oc new-project plugin-quarkus-openshift-console-plugin
+fi
 helm upgrade -i quarkus-openshift-console-plugin charts/openshift-console-plugin --namespace plugin-quarkus-openshift-console-plugin --set plugin.image=docker.io/iocanel/quarkus-openshift-console-plugin:latest
