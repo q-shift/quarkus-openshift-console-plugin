@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { match as RMatch } from 'react-router-dom';
 import Helmet from 'react-helmet';
 import {
   Page,
@@ -11,9 +12,12 @@ import { useEffect, useState } from 'react';
 import { consoleFetchJSON } from '@openshift-console/dynamic-plugin-sdk';
 import { deploymentToQuarkusApplication, deploymentConfigToQuarkusApplication, QuarkusApplication } from '../types';
 import QuarkusApplicationList from '../components/QuarkusApplicationList';
+import { NamespaceBar } from '@openshift-console/dynamic-plugin-sdk';
 
-export default function QuarkusPage() {
+export const QuarkusPage: React.FC<QuarkusHomePageProps> = ({ match }) => {
   const { t } = useTranslation('plugin__console-plugin-template');
+  const { ns } = match?.params;
+  const [activeNamespace, setActiveNamespace] = useState(ns || 'all-namespaces');
 
   const [quarkusApplications, setQuarkusApplications] = useState<QuarkusApplication[]>([]);
   const addQuarkusApplications = (apps: QuarkusApplication[]) => {
@@ -25,21 +29,23 @@ export default function QuarkusPage() {
   };
 
   useEffect(() => {
-    consoleFetchJSON('/api/kubernetes/apis/apps/v1/namespaces/ikanello1-dev/deployments').then((res) => {
+    consoleFetchJSON('/api/kubernetes/apis/apps/v1/namespaces/' + activeNamespace + '/deployments').then((res) => {
         addQuarkusApplications(res.items
         .filter(d => (d.metadata.labels['app.openshift.io/runtime'] === 'quarkus'))
         .map(d => deploymentToQuarkusApplication(d)));
     });
-    consoleFetchJSON('/api/kubernetes/apis/apps.openshift.io/v1/namespaces/ikanello1-dev/deploymentconfigs').then((res) => {
+
+    consoleFetchJSON('/api/kubernetes/apis/apps.openshift.io/v1/namespaces/' + activeNamespace + '/deploymentconfigs').then((res) => {
         addQuarkusApplications(res.items.filter(d => (d.metadata.labels['app.openshift.io/runtime'] === 'quarkus'))
         .map(d => deploymentConfigToQuarkusApplication(d)));
     });
-  }, []);
+  }, [activeNamespace]);
 
   return (
     <>
+      <NamespaceBar onNamespaceChange={namespace => setActiveNamespace(namespace)} />
       <Helmet>
-        <title data-test="example-page-title">{t('Hello, Plugin!')}</title>
+        <title data-test="example-page-title">{t('Quarkus')}</title>
       </Helmet>
       <Page>
         <PageSection variant="light">
@@ -52,3 +58,11 @@ export default function QuarkusPage() {
     </>
   );
 }
+
+type QuarkusHomePageProps = {
+  match: RMatch<{
+    ns?: string;
+  }>;
+};
+
+export default QuarkusPage;
