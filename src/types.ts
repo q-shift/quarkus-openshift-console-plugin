@@ -2,6 +2,8 @@ import { K8sResourceCommon } from "@openshift-console/dynamic-plugin-sdk";
 import { DeploymentCondition, DeploymentKind, DeploymentConfigKind  } from "k8s-types";
 
 export type QuarkusApplication = {
+  cpu?: string;
+  memory?: string;
   status?: {
     availableReplicas?: number;
     collisionCount?: number;

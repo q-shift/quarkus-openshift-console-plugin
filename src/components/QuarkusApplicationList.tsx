@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useEffect } from 'react';
 import { Table, Thead, Tr, Th, Td, Tbody } from '@patternfly/react-table';
 import { QuarkusApplication } from "../types";
 
@@ -11,7 +12,13 @@ export const QuarkusApplicationList: React.FC<QuarkusApplicationListProps> = ({ 
     name: 'Name',
     namespace: 'Namespace',
     created: 'Created',
+    cpu: 'CPU',
+    memory: 'Memory',
   };
+
+  useEffect(() => {
+   //refresh 
+  },[])
   
   return (
     <Table>
@@ -20,6 +27,8 @@ export const QuarkusApplicationList: React.FC<QuarkusApplicationListProps> = ({ 
           <Th>{columnNames.name}</Th>
           <Th>{columnNames.namespace}</Th>
           <Th>{columnNames.created}</Th>
+          <Th>{columnNames.cpu}</Th>
+          <Th>{columnNames.memory}</Th>
         </Tr>
       </Thead>
       <Tbody>
@@ -28,6 +37,8 @@ export const QuarkusApplicationList: React.FC<QuarkusApplicationListProps> = ({ 
             <Td dataLabel={columnNames.name}>{app.metadata.name}</Td>
             <Td dataLabel={columnNames.namespace}>{app.metadata.namespace}</Td>
             <Td dataLabel={columnNames.created}>{app.metadata.creationTimestamp}</Td>
+            <Td dataLabel={columnNames.cpu}>{app.cpu}</Td>
+            <Td dataLabel={columnNames.memory}>{app.memory}</Td>
           </Tr>
         ))}
       </Tbody>
