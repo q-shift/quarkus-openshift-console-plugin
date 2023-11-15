@@ -10,6 +10,7 @@ import './quarkus.css';
 import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
 import { consoleFetchJSON } from '@openshift-console/dynamic-plugin-sdk';
+import { sprintf } from 'sprintf-js';
 import { deploymentToQuarkusApplication, deploymentConfigToQuarkusApplication, QuarkusApplication } from '../types';
 import { NamespaceBar } from '@openshift-console/dynamic-plugin-sdk';
 import { DeploymentKind, DeploymentConfigKind } from '../k8s-types';
@@ -78,20 +79,20 @@ export const QuarkusPage: React.FC<QuarkusHomePageProps> = ({ match }) => {
   }
 
   const populateCpu = (app: QuarkusApplication): Promise<QuarkusApplication>  => {
-    return consoleFetchJSON('/api/prometheus/api/v1/query?query=avg_over_time(process_cpu_usage{service="' + app.metadata.name + '", namespace="' + app.metadata.namespace + '"}[1m]) * 100 * system_cpu_count').then((res) => {
+    return consoleFetchJSON('/api/prometheus/api/v1/query?query=avg_over_time(process_cpu_usage{service="' + app.metadata.name + '", namespace="' + app.metadata.namespace + '"}[1m]) * 100 / avg_over_time(system_cpu_usage[1m])').then((res) => {
       let newApp: QuarkusApplication = {...app};
       if (res && res.data && res.data && res.data.result && res.data.result.length > 0 && res.data.result[0].value && res.data.result[0].value.length > 1) {
-       newApp.cpu=String(res.data.result[0].value[1]);
+       newApp.cpu=sprintf('%.2f', res.data.result[0].value[1]);
       }
       return newApp;
     });
   }
 
   const populateMem = (app: QuarkusApplication): Promise<QuarkusApplication>  => {
-    return consoleFetchJSON('/api/prometheus/api/v1/query?query=sum(jvm_memory_used_bytes{namespace="' + app.metadata.namespace + '", service="' +  app.metadata.name + '"})').then((res) => {
+    return consoleFetchJSON('/api/prometheus/api/v1/query?query=sum(jvm_memory_used_bytes{namespace="' + app.metadata.namespace + '", service="' +  app.metadata.name + '"} / (1024 * 1024))').then((res) => {
       let newApp: QuarkusApplication = {...app};
       if (res && res.data && res.data && res.data.result && res.data.result.length > 0 && res.data.result[0].value && res.data.result[0].value.length > 1) {
-       newApp.memory=String(res.data.result[0].value[1]);
+       newApp.memory=sprintf('%.2f MB', res.data.result[0].value[1]);
       }
       return newApp;
     });
