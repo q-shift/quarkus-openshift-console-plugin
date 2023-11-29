@@ -1,0 +1,56 @@
+---
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
+metadata:
+  annotations:
+    app.openshift.io/vcs-url: <<unknown>>
+    app.quarkus.io/commit-id: 74a2c93990b7f5eaa00f4d82b03c83da11b0414d
+    app.quarkus.io/build-timestamp: 2023-11-29 - 20:24:40 +0000
+  labels:
+    app.kubernetes.io/name: service-proxy
+    app.kubernetes.io/version: 1.0.0-SNAPSHOT
+    app.kubernetes.io/managed-by: quarkus
+    app.openshift.io/runtime: quarkus
+  name: service-proxy
+spec:
+  replicas: 1
+  selector:
+    app.kubernetes.io/version: 1.0.0-SNAPSHOT
+    app.kubernetes.io/name: service-proxy
+  template:
+    metadata:
+      annotations:
+        app.openshift.io/vcs-url: <<unknown>>
+        app.quarkus.io/commit-id: 74a2c93990b7f5eaa00f4d82b03c83da11b0414d
+        app.quarkus.io/build-timestamp: 2023-11-29 - 20:24:40 +0000
+      labels:
+        app.kubernetes.io/managed-by: quarkus
+        app.openshift.io/runtime: quarkus
+        app.kubernetes.io/version: 1.0.0-SNAPSHOT
+        app.kubernetes.io/name: service-proxy
+    spec:
+      containers:
+        - env:
+            - name: KUBERNETES_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: JAVA_APP_JAR
+              value: {{ .Values.app.envs.JAVA_APP_JAR }}
+          image: {{ .Values.app.image }}
+          imagePullPolicy: Always
+          name: service-proxy
+          ports:
+            - containerPort: {{ .Values.app.ports.http }}
+              name: http
+              protocol: TCP
+      serviceAccountName: service-proxy
+  triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+          - service-proxy
+        from:
+          kind: ImageStreamTag
+          name: service-proxy:1.0.0-SNAPSHOT
+      type: ImageChange

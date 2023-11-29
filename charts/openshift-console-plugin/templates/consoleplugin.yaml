@@ -16,3 +16,12 @@ spec:
       namespace: {{ .Release.Namespace }}
       port: {{ .Values.plugin.port }}
       basePath: {{ .Values.plugin.basePath }}
+  proxy:
+  - type: Service
+    alias: {{ .Values.plugin.serviceProxy.alias }}
+    endpoint:
+      type: Service
+      service:
+        name: {{ .Values.plugin.serviceProxy.name }}
+        namespace: {{ .Release.Namespace }}
+        port: {{ .Values.plugin.serviceProxy.port }}

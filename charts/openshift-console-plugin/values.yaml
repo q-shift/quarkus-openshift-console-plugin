@@ -52,3 +52,8 @@ plugin:
         requests:
           cpu: 10m
           memory: 50Mi
+  serviceProxy:
+    alias: "service-proxy"
+    name: "service-proxy"
+    namespace: "default"
+    port: 8080

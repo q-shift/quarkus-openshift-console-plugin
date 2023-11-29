@@ -42,4 +42,4 @@ EXISTING_PROJECT=`oc get projects | grep plugin-quarkus-openshift-console-plugin
 if [ -z "$EXISTING_PROJECT" ]; then
   oc new-project plugin-quarkus-openshift-console-plugin
 fi
-helm upgrade -i quarkus-openshift-console-plugin charts/openshift-console-plugin --namespace plugin-quarkus-openshift-console-plugin --set plugin.image=docker.io/iocanel/quarkus-openshift-console-plugin:latest
+helm upgrade -i quarkus-openshift-console-plugin charts/openshift-console-plugin --namespace plugin-quarkus-openshift-console-plugin --set plugin.image=docker.io/iocanel/quarkus-openshift-console-plugin:20231117

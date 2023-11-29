@@ -11,6 +11,7 @@ For development you can login to an existing [OpenShift](https://www.redhat.com/
 In one terminal window, run:
 
 ```sh
+cd plugin
 yarn install
 yarn run start
 ```
@@ -20,6 +21,7 @@ In another terminal window, run:
 After running `oc login` (requires [oc](https://console.redhat.com/openshift/downloads) and an [OpenShift cluster](https://console.redhat.com/openshift/create))
 
 ```sh
+cd plugin
 yarn run start-console
 ```
 (requires [Docker](https://www.docker.com) or [podman 3.2.0+](https://podman.io))
