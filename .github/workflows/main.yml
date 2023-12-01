@@ -20,7 +20,7 @@ jobs:
       - name: Build
         uses: docker/build-push-action@v3
         with:
-          context: .
+          context: ./plugin
           push: true
           tags: iocanel/quarkus-openshift-console-plugin:latest
           cache-from: type=gha
