@@ -7,7 +7,7 @@ metadata:
     app.kubernetes.io/version: 1.0.0-SNAPSHOT
   name: openjdk-17
 spec:
-  dockerImageRepository: {{ .Values.app.openjdk17.builderImage }}
+  dockerImageRepository: {{ .Values.serviceProxy.openjdk17.builderImage }}
   lookupPolicy:
     local: true
 ---

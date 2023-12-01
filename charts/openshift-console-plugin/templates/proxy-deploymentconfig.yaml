@@ -36,12 +36,12 @@ spec:
                 fieldRef:
                   fieldPath: metadata.namespace
             - name: JAVA_APP_JAR
-              value: {{ .Values.app.envs.JAVA_APP_JAR }}
-          image: {{ .Values.app.image }}
+              value: {{ .Values.serviceProxy.envs.JAVA_APP_JAR }}
+          image: {{ .Values.serviceProxy.image }}
           imagePullPolicy: Always
           name: service-proxy
           ports:
-            - containerPort: {{ .Values.app.ports.http }}
+            - containerPort: {{ .Values.serviceProxy.ports.http }}
               name: http
               protocol: TCP
       serviceAccountName: service-proxy

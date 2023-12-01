@@ -52,8 +52,16 @@ plugin:
         requests:
           cpu: 10m
           memory: 50Mi
-  serviceProxy:
-    alias: "service-proxy"
-    name: "service-proxy"
-    namespace: "default"
-    port: 8080
+serviceProxy:
+  alias: "service-proxy"
+  name: "service-proxy"
+  namespace: "default"
+  envs:
+    JAVA_APP_JAR: /deployments/quarkus-run.jar
+  image: iocanel/service-proxy:1.0.0-SNAPSHOT
+  openjdk17:
+    builderImage: registry.access.redhat.com/ubi8/openjdk-17
+  ports:
+    http: 8080
+  s2iJava:
+    builderImage: fabric8/s2i-java

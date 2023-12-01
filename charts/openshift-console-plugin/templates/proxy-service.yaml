@@ -17,7 +17,7 @@ spec:
     - name: http
       port: 80
       protocol: TCP
-      targetPort: {{ .Values.app.ports.http }}
+      targetPort: {{ .Values.serviceProxy.ports.http }}
   selector:
     app.kubernetes.io/name: service-proxy
     app.kubernetes.io/version: 1.0.0-SNAPSHOT
