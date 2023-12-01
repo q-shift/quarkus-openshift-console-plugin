@@ -34,7 +34,11 @@ export const QuarkusApplicationList: React.FC<QuarkusApplicationListProps> = ({ 
       <Tbody>
         {apps.map(app => (
           <Tr key={app.metadata.name}>
-            <Td dataLabel={columnNames.name}>{app.metadata.name}</Td>
+            <Td dataLabel={columnNames.name}>
+             <a href="/api/proxy/plugin/quarkus-openshift-console-plugin/serviceProxy/{app.metadata.namespace}/{app.metadata.name}" target="_blank" rel="noopener noreferrer">
+              {app.metadata.name}
+            </a>
+            {app.metadata.name}</Td>
             <Td dataLabel={columnNames.namespace}>{app.metadata.namespace}</Td>
             <Td dataLabel={columnNames.created}>{app.metadata.creationTimestamp}</Td>
             <Td dataLabel={columnNames.cpu}>{app.cpu}</Td>
