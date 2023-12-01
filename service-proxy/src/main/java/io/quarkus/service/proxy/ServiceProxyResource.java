@@ -18,26 +18,12 @@ public class ServiceProxyResource {
   @Inject
   Vertx vertx;
 
-  /*
   @GET
-  @Path("/reactive/{namespace}/{name}/{path}")
-  public CompletableFuture<Response> proxy(String namespace, String name, String path) {
-       WebClient client = WebClient.create(vertx);
-       return client
-            .get(80, name + "." + namespace, "/" + path)
-            .send()
-            .convert()
-            .toCompletableFuture()
-            .thenApply(response -> Response.status(response.statusCode()).entity(response.bodyAsString()).build());
-  }
-*/
-
-  @GET
-  @Path("/{namespace}/{name}/{path}")
+  @Path("/{namespace}/{name}")
   public Response proxy(String namespace, String name, String path) {
        WebClient client = WebClient.create(vertx);
        return client
-            .get(80, name + "." + namespace, "/" + path)
+            .get(80, name + "." + namespace, "/q/dev")
             .send()
             .toCompletionStage()
             .thenApply(response -> Response.status(response.statusCode()).entity(response.bodyAsString()).build())
