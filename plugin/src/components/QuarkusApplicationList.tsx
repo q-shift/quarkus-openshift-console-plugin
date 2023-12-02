@@ -16,6 +16,8 @@ export const QuarkusApplicationList: React.FC<QuarkusApplicationListProps> = ({ 
     memory: 'Memory',
   };
 
+  const devUiUrl = (app) => `/api/proxy/plugin/quarkus-openshift-console-plugin/service-proxy/produi/${app.metadata.namespace}/${app.metadata.name}/`
+
   useEffect(() => {
    //refresh 
   },[])
@@ -32,10 +34,10 @@ export const QuarkusApplicationList: React.FC<QuarkusApplicationListProps> = ({ 
         </Tr>
       </Thead>
       <Tbody>
-        {apps.map(app => (
+        {apps && apps.filter(app => app.metadata && app.metadata.name && app.metadata.namespace).map(app => (
           <Tr key={app.metadata.name}>
             <Td dataLabel={columnNames.name}>
-             <a href="/api/proxy/plugin/quarkus-openshift-console-plugin/serviceProxy/{app.metadata.namespace}/{app.metadata.name}" target="_blank" rel="noopener noreferrer">
+             <a href={devUiUrl(app)} target="_blank" rel="noopener noreferrer">
               {app.metadata.name}
             </a>
             </Td>
