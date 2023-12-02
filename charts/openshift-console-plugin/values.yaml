@@ -2,8 +2,8 @@
 plugin:
   name: ""
   description: ""
-  image: ""
-  imagePullPolicy: IfNotPresent
+  image: "quay.io/ikanello/quarkus-openshift-console-plugin:latest"
+  imagePullPolicy: Always
   replicas: 2
   port: 9443
   securityContext:
@@ -55,7 +55,7 @@ plugin:
 serviceProxy:
   alias: "service-proxy"
   name: "service-proxy"
-  namespace: "default"
+  namespace: "plugin-quarkus-openshift-console-plugin"
   envs:
     JAVA_APP_JAR: /deployments/quarkus-run.jar
   image: iocanel/service-proxy:1.0.0-SNAPSHOT
@@ -63,5 +63,6 @@ serviceProxy:
     builderImage: registry.access.redhat.com/ubi8/openjdk-17
   ports:
     http: 8080
+    https: 8443
   s2iJava:
     builderImage: fabric8/s2i-java
