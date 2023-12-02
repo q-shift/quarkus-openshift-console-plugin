@@ -24,4 +24,4 @@ spec:
       service:
         name: {{ .Values.serviceProxy.name }}
         namespace: {{ .Release.Namespace }}
-        port: {{ .Values.serviceProxy.ports.http }}
+        port: 443
