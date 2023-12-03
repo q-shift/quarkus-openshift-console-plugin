@@ -13,9 +13,9 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.Produces;
  
 @Path("/produi")
-public class ServiceProxyResource {
+public class ProduiProxyResource {
 
-  private Logger log = Logger.getLogger(ServiceProxyResource.class);
+  private Logger log = Logger.getLogger(ProduiProxyResource.class);
   private static final String PATH = "/q/dev-ui";
 
   @Inject
