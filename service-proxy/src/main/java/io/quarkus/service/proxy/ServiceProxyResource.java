@@ -12,12 +12,11 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.Produces;
  
-
 @Path("/produi")
 public class ServiceProxyResource {
 
   private Logger log = Logger.getLogger(ServiceProxyResource.class);
-  private static final String PATH = "/q/dev";
+  private static final String PATH = "/q/dev-ui";
 
   @Inject
   KubernetesClient kubernetesClient;
@@ -28,11 +27,26 @@ public class ServiceProxyResource {
   @GET
   @Path("/{namespace}/{name}/")
   @Produces(MediaType.TEXT_HTML)
+  public Response proxy(String namespace, String name) {
+    return proxy(namespace, name, PATH);
+  }
+
+  @GET
+  @Path("/{namespace}/{name}/{path}")
+  @Produces(MediaType.TEXT_HTML)
   public Response proxy(String namespace, String name, String path) {
        WebClient client = WebClient.create(vertx);
-       log.info("Proxying: http://" + name + "." + namespace +  PATH);
+       StringBuilder pathBuilder = new StringBuilder();
+       pathBuilder.append(PATH);
+       if (path != null && !path.equals(PATH)) {
+         pathBuilder.append("/");
+         pathBuilder.append(path);
+       }
+       String fullPath = pathBuilder.toString();
+
+       log.info("Proxying: http://" + name + "." + namespace + fullPath);
        return client
-            .get(80, name + "." + namespace, PATH)
+            .get(80, name + "." + namespace, fullPath)
             .send()
             .toCompletionStage()
             .thenApply(response -> Response.status(response.statusCode())
