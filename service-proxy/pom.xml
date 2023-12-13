@@ -58,6 +58,11 @@
       <version>1.2.1</version>
     </dependency>
     <dependency>
+      <groupId>org.jsoup</groupId>
+      <artifactId>jsoup</artifactId>
+      <version>1.14.3</version> <!-- Use the latest version available -->
+    </dependency>
+    <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-webjars-locator</artifactId>
     </dependency>
