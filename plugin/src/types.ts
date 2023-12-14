@@ -1,7 +1,7 @@
 import { K8sResourceCommon } from "@openshift-console/dynamic-plugin-sdk";
 import { DeploymentCondition, DeploymentKind, DeploymentConfigKind  } from "k8s-types";
 
-export type QuarkusApplication = {
+export type Application = {
   cpu?: string;
   memory?: string;
   status?: {
@@ -16,7 +16,7 @@ export type QuarkusApplication = {
   };
 } & K8sResourceCommon;
 
-export function deploymentToQuarkusApplication(deployment: DeploymentKind): QuarkusApplication {
+export function deploymentToApplication(deployment: DeploymentKind): Application {
   return {
     metadata: {
       ...deployment.metadata,
@@ -27,7 +27,7 @@ export function deploymentToQuarkusApplication(deployment: DeploymentKind): Quar
   };
 };
 
-export function deploymentConfigToQuarkusApplication(deployment: DeploymentConfigKind): QuarkusApplication {
+export function deploymentConfigToApplication(deployment: DeploymentConfigKind): Application {
   return {
     metadata: {
       ...deployment.metadata,

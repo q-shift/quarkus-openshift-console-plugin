@@ -68,8 +68,8 @@
     "displayName": "Quarkus OpenShift Console Plugin",
     "description": "Quarkus plugin for the OpenShift Console",
     "exposedModules": {
-      "QuarkusHomePage": "./pages/QuarkusHomePage",
-      "quarkusActions": "./actions"
+      "HomePage": "./pages/HomePage",
+      "actions": "./actions"
     },
     "dependencies": {
       "@console/pluginAPI": "*"

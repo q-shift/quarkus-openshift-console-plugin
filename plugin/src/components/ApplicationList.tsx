@@ -1,13 +1,13 @@
 import * as React from "react";
 import { useEffect } from 'react';
 import { Table, Thead, Tr, Th, Td, Tbody } from '@patternfly/react-table';
-import { QuarkusApplication } from "../types";
+import { Application } from "../types";
 
-interface QuarkusApplicationListProps {
-  apps: QuarkusApplication[];
+interface ApplicationListProps {
+  apps: Application[];
 }
 
-export const QuarkusApplicationList: React.FC<QuarkusApplicationListProps> = ({ apps }) => {
+export const ApplicationList: React.FC<ApplicationListProps> = ({ apps }) => {
   const columnNames = {
     name: 'Name',
     namespace: 'Namespace',
@@ -52,4 +52,4 @@ export const QuarkusApplicationList: React.FC<QuarkusApplicationListProps> = ({ 
   );
 };
  
-export default QuarkusApplicationList;
+export default ApplicationList;

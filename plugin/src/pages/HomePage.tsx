@@ -11,36 +11,35 @@ import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
 import { consoleFetchJSON } from '@openshift-console/dynamic-plugin-sdk';
 import { sprintf } from 'sprintf-js';
-import { deploymentToQuarkusApplication, deploymentConfigToQuarkusApplication, QuarkusApplication } from '../types';
+import { deploymentToApplication, deploymentConfigToApplication, Application } from '../types';
 import { NamespaceBar } from '@openshift-console/dynamic-plugin-sdk';
 import { DeploymentKind, DeploymentConfigKind } from '../k8s-types';
-import QuarkusApplicationList from '../components/QuarkusApplicationList';
+import ApplicationList from '../components/ApplicationList';
 
 export const QuarkusPage: React.FC<QuarkusHomePageProps> = ({ match }) => {
   const { t } = useTranslation('plugin__console-plugin-template');
-  const { ns } = match?.params;
+  const { ns } = match?.params || {};
 
   const [activeNamespace, setActiveNamespace] = useState(ns || 'all-namespaces');
-  const [quarkusApplications, setQuarkusApplications] = useState<QuarkusApplication[]>([]);
+  const [Applications, setApplications] = useState<Application[]>([]);
 
   useEffect(() => {
-    console.log('activeNamespace: ' + activeNamespace);
-    setQuarkusApplications([]);
-    fetchDeployments().then((apps: QuarkusApplication[]) => {
-       let newApps: QuarkusApplication[] = [...quarkusApplications];
+    setApplications([]);
+    fetchDeployments().then((apps: Application[]) => {
+       let newApps: Application[] = [...Applications];
        apps.forEach(app => { 
-         populateMetrics(app).then((app: QuarkusApplication) => { 
-           addQuarkusApplication(app, newApps);
+         populateMetrics(app).then((app: Application) => { 
+           addApplication(app, newApps);
            newApps.push(app);
          });
        });
     });
 
-    fetchDeploymentConfigs().then((apps: QuarkusApplication[]) => {
-       let newApps: QuarkusApplication[] = [...quarkusApplications];
+    fetchDeploymentConfigs().then((apps: Application[]) => {
+       let newApps: Application[] = [...Applications];
        apps.forEach(app => { 
-         populateMetrics(app).then((app: QuarkusApplication) => { 
-           addQuarkusApplication(app, newApps);
+         populateMetrics(app).then((app: Application) => { 
+           addApplication(app, newApps);
            newApps.push(app);
          });
        });
@@ -49,38 +48,38 @@ export const QuarkusPage: React.FC<QuarkusHomePageProps> = ({ match }) => {
   }, [activeNamespace]);
   
   useEffect(() => {
-   quarkusApplications.map(app => app.metadata.name + "{cpu:" +  app.cpu + ", memory:" + app.memory + "}").forEach(console.log);
-  }, [quarkusApplications]);
+   Applications.map(app => app.metadata.name + "{cpu:" +  app.cpu + ", memory:" + app.memory + "}").forEach(console.log);
+  }, [Applications]);
 
-  const addQuarkusApplication = (newApp: QuarkusApplication, existingApps: QuarkusApplication[]) => {
+  const addApplication = (newApp: Application, existingApps: Application[]) => {
    console.log('adding: ' + newApp.metadata.name + ' to [' + existingApps.map(app => app.metadata.name + "{cpu:" +  app.cpu + ", memory:" + app.memory + "}").join(',') + ']');
-    const updatedQuarkusApplications = [...existingApps, newApp];
-    setQuarkusApplications(updatedQuarkusApplications);
+    const updatedApplications = [...existingApps, newApp];
+    setApplications(updatedApplications);
   };
 
-  const fetchDeployments = (): Promise<QuarkusApplication[]> => {
+  const fetchDeployments = (): Promise<Application[]> => {
     return consoleFetchJSON('/api/kubernetes/apis/apps/v1/namespaces/' + activeNamespace + '/deployments').then(res => {
       return res.items
         .filter((d: DeploymentKind) => (d.metadata.labels['app.openshift.io/runtime'] === 'quarkus'))
-        .map((d: DeploymentKind) => deploymentToQuarkusApplication(d));
+        .map((d: DeploymentKind) => deploymentToApplication(d));
     });
   }
 
-  const fetchDeploymentConfigs = (): Promise<QuarkusApplication[]> => {
+  const fetchDeploymentConfigs = (): Promise<Application[]> => {
     return consoleFetchJSON('/api/kubernetes/apis/apps.openshift.io/v1/namespaces/' + activeNamespace + '/deploymentconfigs').then(res => {
       return res.items
         .filter((d: DeploymentConfigKind) => (d.metadata.labels['app.openshift.io/runtime'] === 'quarkus'))
-        .map((d: DeploymentConfigKind) => deploymentConfigToQuarkusApplication(d));
+        .map((d: DeploymentConfigKind) => deploymentConfigToApplication(d));
     });
   }
 
-  const populateMetrics = (app: QuarkusApplication): Promise<QuarkusApplication>  => {
+  const populateMetrics = (app: Application): Promise<Application>  => {
     return populateCpu(app).then(populateMem);
   }
 
-  const populateCpu = (app: QuarkusApplication): Promise<QuarkusApplication>  => {
+  const populateCpu = (app: Application): Promise<Application>  => {
     return consoleFetchJSON('/api/prometheus/api/v1/query?query=avg_over_time(process_cpu_usage{service="' + app.metadata.name + '", namespace="' + app.metadata.namespace + '"}[1m]) * 100 / avg_over_time(system_cpu_usage[1m])').then((res) => {
-      let newApp: QuarkusApplication = {...app};
+      let newApp: Application = {...app};
       if (res && res.data && res.data && res.data.result && res.data.result.length > 0 && res.data.result[0].value && res.data.result[0].value.length > 1) {
        newApp.cpu=sprintf('%.2f', res.data.result[0].value[1]);
       }
@@ -88,9 +87,9 @@ export const QuarkusPage: React.FC<QuarkusHomePageProps> = ({ match }) => {
     });
   }
 
-  const populateMem = (app: QuarkusApplication): Promise<QuarkusApplication>  => {
+  const populateMem = (app: Application): Promise<Application>  => {
     return consoleFetchJSON('/api/prometheus/api/v1/query?query=sum(jvm_memory_used_bytes{namespace="' + app.metadata.namespace + '", service="' +  app.metadata.name + '"} / (1024 * 1024))').then((res) => {
-      let newApp: QuarkusApplication = {...app};
+      let newApp: Application = {...app};
       if (res && res.data && res.data && res.data.result && res.data.result.length > 0 && res.data.result[0].value && res.data.result[0].value.length > 1) {
        newApp.memory=sprintf('%.2f MB', res.data.result[0].value[1]);
       }
@@ -109,7 +108,7 @@ export const QuarkusPage: React.FC<QuarkusHomePageProps> = ({ match }) => {
           <Title headingLevel="h1">{t('Quarkus Applications')}</Title>
         </PageSection>
         <PageSection variant="light">
-        <QuarkusApplicationList apps={quarkusApplications} />
+        <ApplicationList apps={Applications} />
         </PageSection>
       </Page>
     </>

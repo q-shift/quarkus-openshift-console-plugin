@@ -2,7 +2,7 @@
  {
     "type": "console.flag/hookProvider",
     "properties": {
-      "handler": { "$codeRef": "quarkusActions.enableQuarkusPlugin" }
+      "handler": { "$codeRef": "actions.enableQuarkusPlugin" }
     }
   },
   {
@@ -10,13 +10,13 @@
     "properties": {
       "exact": true,
       "path": "/quarkus",
-      "component": { "$codeRef": "QuarkusHomePage" }
+      "component": { "$codeRef": "HomePage" }
     }
   },
   {
     "type": "console.navigation/href",
     "properties": {
-      "id": "quarkusHome",
+      "id": "Home",
       "name": "%quarkus-plugin~Quarkus%",
       "href": "/quarkus",
       "perspective": "dev",
