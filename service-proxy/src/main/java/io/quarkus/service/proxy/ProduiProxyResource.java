@@ -48,7 +48,7 @@ public class ProduiProxyResource {
   public Response proxy(String namespace, String name, String path) {
        WebClient client = WebClient.create(vertx);
        String fullPath = path.startsWith("/") ? path : "/" + path;
-       log.info("Proxying: http://" + name + "." + namespace + fullPath);
+       log.info("Proxying produi endpoint: http://" + name + "." + namespace + fullPath);
        return client
             .get(80, name + "." + namespace, fullPath)
             .send()
