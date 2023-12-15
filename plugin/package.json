@@ -69,6 +69,7 @@
     "description": "Quarkus plugin for the OpenShift Console",
     "exposedModules": {
       "HomePage": "./pages/HomePage",
+      "DetailsPage": "./pages/DetailsPage",
       "actions": "./actions"
     },
     "dependencies": {
@@ -76,6 +77,8 @@
     }
   },
   "dependencies": {
-    "@patternfly/react-table": "^5.1.1"
+    "@patternfly/react-table": "^5.1.1",
+    "rxjs": "^7.8.1",
+    "zustand": "^4.4.7"
   }
 }

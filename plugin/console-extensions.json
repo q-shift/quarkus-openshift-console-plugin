@@ -9,8 +9,16 @@
     "type": "console.page/route",
     "properties": {
       "exact": true,
-      "path": "/quarkus",
+      "path": ["/quarkus/ns/:ns", "/quarkus/all-namespaces"],
       "component": { "$codeRef": "HomePage" }
+    }
+  },
+  {
+    "type": "console.page/route",
+    "properties": {
+      "exact": true,
+      "path": "/quarkus/details/:ns/:name",
+      "component": { "$codeRef": "DetailsPage" }
     }
   },
   {
@@ -20,7 +28,8 @@
       "name": "%quarkus-plugin~Quarkus%",
       "href": "/quarkus",
       "perspective": "dev",
-      "section": "resources"
+      "section": "resources",
+      "namespaced": true,
     }
   }
 ]

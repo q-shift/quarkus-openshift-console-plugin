@@ -1,9 +1,11 @@
 import { K8sResourceCommon } from "@openshift-console/dynamic-plugin-sdk";
-import { DeploymentCondition, DeploymentKind, DeploymentConfigKind  } from "k8s-types";
+import { DeploymentCondition, DeploymentKind, DeploymentConfigKind, PodSpec  } from "k8s-types";
 
 export type Application = {
   cpu?: string;
   memory?: string;
+  url?: string;
+  spec: PodSpec;
   status?: {
     availableReplicas?: number;
     collisionCount?: number;
@@ -21,6 +23,9 @@ export function deploymentToApplication(deployment: DeploymentKind): Application
     metadata: {
       ...deployment.metadata,
     },
+    spec: {
+      ...deployment.spec.template.spec,
+    },
     status: {
       ...deployment.status,
     },
@@ -31,6 +36,9 @@ export function deploymentConfigToApplication(deployment: DeploymentConfigKind):
   return {
     metadata: {
       ...deployment.metadata,
+    },
+    spec: {
+      ...deployment.spec.template.spec,
     },
     status: {
       ...deployment.status,
