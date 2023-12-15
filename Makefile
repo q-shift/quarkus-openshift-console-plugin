@@ -4,7 +4,7 @@ service-proxy:
 	cd service-proxy && mvn clean install
 
 service-proxy-image: service-proxy
-	docker build -t quay.io/ikanello/quarkus-openshift-console-plugin:latest plugin
+	docker build -t quay.io/ikanello/quarkus-openshift-console-service-proxy:latest servcie-proxy -f service-proxy/src/main/docker/Dockerfile.jvm
 
 plugin-image: plugin
 	docker build -t quay.io/ikanello/quarkus-openshift-console-plugin:latest plugin
@@ -12,10 +12,10 @@ plugin-image: plugin
 images: plugin-image service-proxy-iamge
 
 push-service-proxy: service-proxy-image 
-	docker push quay.io/ikanello/quarkus-openshift-console-plugin:latest
+	docker push quay.io/ikanello/quarkus-openshift-console-service-proxy:latest
 
 push-plugin: plugin-image 
-	docker push quay.io/ikanello/quarkus-openshift-console-produi-proxy:latest
+	docker push quay.io/ikanello/quarkus-openshift-console-plugin:latest
 
 push: push-plugin push-service-proxy
 
