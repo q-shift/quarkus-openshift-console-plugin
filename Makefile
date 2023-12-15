@@ -1,5 +1,5 @@
 plugin:
-	cd plugin && yarn install
+	cd plugin && yarn build && yarn install
 service-proxy:
 	cd service-proxy && mvn clean install
 
@@ -13,10 +13,10 @@ images: plugin-image service-proxy-iamge
 
 push-service-proxy: service-proxy-image 
 	docker push quay.io/ikanello/quarkus-openshift-console-plugin:latest
-	docker push quay.io/ikanello/quarkus-openshift-console-produi-proxy:latest
 
 push-plugin: plugin-image 
 	docker push quay.io/ikanello/quarkus-openshift-console-produi-proxy:latest
+
 push: push-plugin push-service-proxy
 
 deploy-plugin:
