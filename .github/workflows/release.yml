@@ -42,7 +42,7 @@ jobs:
           context: ./service-proxy
           file: ./service-proxy/src/main/docker/Dockerfile.jvm
           push: true
-          tags: ikanello/quarkus-openshift-console-produi-proxy:{{ github.ref_name }}
+          tags: ikanello/quarkus-openshift-console-service-proxy:{{ github.ref_name }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           username: ${{ secrets.QUAY_USERNAME }}
