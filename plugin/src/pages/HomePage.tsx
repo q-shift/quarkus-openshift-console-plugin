@@ -15,7 +15,8 @@ import { NamespaceBar } from '@openshift-console/dynamic-plugin-sdk';
 import ApplicationList from '../components/ApplicationList';
 import { Application } from '../types';
 import { fetchApplicationsWithMetrics } from '../services/QuarkusService';
-//import { useParams } from 'react-router-dom-v5-compat';
+import ApplicationsCPUGraph from '../components/ApplicationsCPUGraph';
+import ApplicationsMemoryGraph from '../components/ApplicationsMemoryGraph';
 
 export const QuarkusPage: React.FC<QuarkusHomePageProps> = ({ match }) => {
   const { t } = useTranslation('plugin__console-plugin-template');
@@ -52,6 +53,18 @@ export const QuarkusPage: React.FC<QuarkusHomePageProps> = ({ match }) => {
               <ApplicationList apps={applications} />
             </CardBody>
           </Card>
+        </PageSection>
+        <PageSection variant="light">
+          <Card>
+             <CardBody style={{ display: 'flex', flexDirection: 'row' }}>
+               <div style={{ flex: 1 }}>
+                 <ApplicationsCPUGraph applications={applications} />
+               </div>
+               <div style={{ flex: 1 }}>
+                 <ApplicationsMemoryGraph applications={applications} />
+               </div>
+             </CardBody>
+           </Card>
         </PageSection>
       </Page>
     </>
