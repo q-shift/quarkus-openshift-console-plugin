@@ -18,7 +18,7 @@
     "properties": {
       "exact": true,
       "path": "/quarkus/details/:ns/:name",
-      "component": { "$codeRef": "DetailsPage" }
+      "component": { "$codeRef": "ApplicationPage" }
     }
   },
   {

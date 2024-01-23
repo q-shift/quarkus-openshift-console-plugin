@@ -71,7 +71,7 @@
     "description": "Quarkus plugin for the OpenShift Console",
     "exposedModules": {
       "HomePage": "./pages/HomePage",
-      "DetailsPage": "./pages/DetailsPage",
+      "ApplicationPage": "./pages/ApplicationPage",
       "actions": "./actions"
     },
     "dependencies": {

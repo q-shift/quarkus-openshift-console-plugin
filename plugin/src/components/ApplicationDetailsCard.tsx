@@ -11,11 +11,13 @@ import {
 } from '@patternfly/react-core';
 
 import { Application } from '../types';
+import Status from '@openshift-console/dynamic-plugin-sdk/lib/app/components/status/Status';
 
 interface ApplicationDetails {
   name: string;
   location: string;
   healthEndpoint: string;
+  healthEndpointStatus: string;
   metricsEndpoint: string;
   infoEndpoint: string;
   produiEndpoint: string;
@@ -37,6 +39,11 @@ function getHealthCheckEndpoint(application: Application): string | null {
   }
   return null;
 }
+
+function getHealthStatus(application: Application): string | null {
+  return application.status.replicas === application.status.availableReplicas ? "Succeeded" : "Failed";
+}
+
 const ApplicationDetailsCard: React.FC<{application: Application }> = ({ application }) => {
    const [details, setDetails] = useState<ApplicationDetails>();
 
@@ -46,6 +53,7 @@ const ApplicationDetailsCard: React.FC<{application: Application }> = ({ applica
          name: application.metadata.name,
          location: application.url,
          healthEndpoint: getHealthCheckEndpoint(application), 
+         healthEndpointStatus: getHealthStatus(application),
          metricsEndpoint: "/q/metrics",
          infoEndpoint: "/q/info",
          produiEndpoint: "/q/dev",
@@ -62,7 +70,7 @@ const ApplicationDetailsCard: React.FC<{application: Application }> = ({ applica
   return (
 
     <Card>
-      <CardTitle>Live View</CardTitle>
+      <CardTitle>Details</CardTitle>
       {details &&
       <CardBody>
         <DescriptionList isHorizontal>
@@ -81,7 +89,7 @@ const ApplicationDetailsCard: React.FC<{application: Application }> = ({ applica
           <DescriptionListGroup>
             <DescriptionListTerm>Health Endpoint</DescriptionListTerm>
             <DescriptionListDescription>
-            {details.healthEndpoint}</DescriptionListDescription>
+              <Status title={details.healthEndpoint} status={details.healthEndpointStatus}/></DescriptionListDescription>
           </DescriptionListGroup>
           <DescriptionListGroup>
             <DescriptionListTerm>Metrics Endpoint</DescriptionListTerm>
