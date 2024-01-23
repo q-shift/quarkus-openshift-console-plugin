@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Table, Thead, Tr, Th, Td, Tbody } from '@patternfly/react-table';
 import { Application } from "../types";
+import Status from "@openshift-console/dynamic-plugin-sdk/lib/app/components/status/Status";
 interface ApplicationListProps {
   apps: Application[];
 }
@@ -45,7 +46,7 @@ export const ApplicationList: React.FC<ApplicationListProps> = ({ apps }) => {
             </Link>
             </Td>
             <Td dataLabel={columnNames.namespace}>{app.metadata.namespace}</Td>
-            <Td dataLabel={columnNames.status}>{app.status.availableReplicas} of {app.status.replicas} pods</Td>
+            <Td dataLabel={columnNames.status}><Status title={`${app.status.availableReplicas} of ${app.status.replicas} pods`} status={app.status.availableReplicas === app.status.replicas ? "Succeeded" : "Failed"}/></Td>
             <Td dataLabel={columnNames.cpu}>{app.cpu}</Td>
             <Td dataLabel={columnNames.memory}>{app.memory}</Td>
             <Td dataLabel={columnNames.created}>{calculateTimeDifference(app.metadata.creationTimestamp)} ago</Td>
