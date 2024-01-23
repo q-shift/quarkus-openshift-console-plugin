@@ -2,6 +2,8 @@ import * as React from 'react';
 import { match as RMatch } from 'react-router-dom';
 import Helmet from 'react-helmet';
 import {
+    Card,
+    CardBody,
   Page,
   PageSection,
   Title,
@@ -39,12 +41,17 @@ export const QuarkusPage: React.FC<QuarkusHomePageProps> = ({ match }) => {
       <Helmet>
         <title data-test="example-page-title">{t('Quarkus')}</title>
       </Helmet>
+
       <Page>
         <PageSection variant="light">
           <Title headingLevel="h1">{t('Quarkus Applications')}</Title>
         </PageSection>
         <PageSection variant="light">
-        <ApplicationList apps={applications} />
+          <Card>
+            <CardBody>
+              <ApplicationList apps={applications} />
+            </CardBody>
+          </Card>
         </PageSection>
       </Page>
     </>
