@@ -11,13 +11,13 @@ import { graphTheme } from '../theme';
 
 const ApplicationMemoryGraph: React.FC<{applications: Application[] }> = ({ applications }) => {
 
-   const [cpuData, _ ] = useState<number[][]>([]); 
+   const [data, _ ] = useState<number[][]>([]); 
 
    useEffect(() => {
    }, [applications]);
 
-  return (
 
+  return (
     <Card>
       <CardTitle>Memory</CardTitle>
       <CardBody>
@@ -30,8 +30,7 @@ const ApplicationMemoryGraph: React.FC<{applications: Application[] }> = ({ appl
                 <ChartAxis label="Time" />
                 <ChartGroup>
                   <ChartLine
-                    data={applications.map((app) => ({ x: app.metadata.name, y: cpuData[applications.indexOf(app)] }))}
-                  />
+                    data={applications.map((app) => ({ name: app.metadata.name, x: data[applications.indexOf(app)][2], y: data[applications.indexOf(app)][1] }))} />
                 </ChartGroup>
               </Chart>
       </CardBody>
