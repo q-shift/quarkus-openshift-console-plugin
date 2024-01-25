@@ -27,15 +27,10 @@ export const QuarkusPage: React.FC<QuarkusHomePageProps> = ({ match }) => {
 
   useEffect(() => {
     fetchApplicationsWithMetrics(activeNamespace).then((apps: Application[]) => {
-      console.log('Setting applications' + apps);
       setApplications(apps);
     })
   }, [activeNamespace]);
   
-  useEffect(() => {
-   applications.map(app => app.metadata.name + "{cpu:" +  app.cpu + ", memory:" + app.memory + "}").forEach(console.log);
-  }, [applications]);
-
   return (
     <>
       <NamespaceBar onNamespaceChange={namespace => setActiveNamespace(namespace)} />
