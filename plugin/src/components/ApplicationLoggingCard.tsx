@@ -36,12 +36,15 @@ const ApplicationLoggingCard: React.FC<{application: Application }> = ({ applica
   const [selected, setSelected] = useState('INFO');
   const [loggers, _] = useState<Logger[]>([{name: 'root', level: 'INFO'}]);
 
-  const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
 //  const [currentCategory, setCurrentCategory] = useState('Name');
+
+  useEffect(() => {
+  }, [application]);
 
   //
   // Filtering
   //
+  const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const showClearButton = !!inputValue;
   const showUtilities = showClearButton;
@@ -57,11 +60,6 @@ const ApplicationLoggingCard: React.FC<{application: Application }> = ({ applica
       setInputValue(value);
     }
   };
-  //
-
-
-  useEffect(() => {
-  }, [application]);
 
   const onDelete = () => {
 
