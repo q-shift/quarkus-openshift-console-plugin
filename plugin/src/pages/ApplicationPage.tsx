@@ -14,7 +14,7 @@ import { match as RMatch } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
 import { Application } from '../types';
-import { fetchApplication } from '../services/QuarkusService';
+import { fetchApplicationWithMetrics } from '../services/QuarkusService';
 import ApplicationDetailsCard from '../components/ApplicationDetailsCard';
 import ApplicationAlertsCard from '../components/ApplicationAlertsCard';
 import ApplicationMetricsCard from '../components/ApplicationMetricsCard';
@@ -35,9 +35,9 @@ export const ApplicationPage: React.FC<ApplicationPageProps> = ( {match} ) => {
   };
 
   useEffect(() => {
-    fetchApplication(selectedNamespace, selectedName).then((app: Application) => {
+    fetchApplicationWithMetrics(selectedNamespace, selectedName).then((app: Application) => {
       setApplication(app);
-    });
+    })
   }, [selectedNamespace, selectedName]);
   
   return (

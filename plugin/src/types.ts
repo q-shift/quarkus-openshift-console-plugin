@@ -1,10 +1,24 @@
 import { K8sResourceCommon } from "@openshift-console/dynamic-plugin-sdk";
 import { DeploymentCondition, DeploymentKind, DeploymentConfigKind, PodSpec  } from "k8s-types";
 
+
+export type Snapshot = {
+ name: string;
+ x: string; 
+ y: number;
+}
+
+export type Metrics = {
+  cpu?: Snapshot[];
+  memory?: Snapshot[];
+};
+
+
 export type Application = {
   cpu?: string;
   memory?: string;
   url?: string;
+  metrics?: Metrics;
   spec: PodSpec;
   status?: {
     availableReplicas?: number;
@@ -26,6 +40,10 @@ export function deploymentToApplication(deployment: DeploymentKind): Application
     spec: {
       ...deployment.spec.template.spec,
     },
+    metrics: {
+      cpu: [],
+      memory: [],
+    },
     status: {
       ...deployment.status,
     },
@@ -39,6 +57,10 @@ export function deploymentConfigToApplication(deployment: DeploymentConfigKind):
     },
     spec: {
       ...deployment.spec.template.spec,
+    },
+    metrics: {
+      cpu: [],
+      memory: [],
     },
     status: {
       ...deployment.status,

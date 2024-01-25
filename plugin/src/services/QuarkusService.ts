@@ -43,7 +43,7 @@ async function fetchDeploymentConfig(ns: string, name: string): Promise<Applicat
 }
 
 async function populateAdddionalInfo(app: Application): Promise<Application>  {
-  return populateCpu(app).then(populateMem).then(populateRoute);
+  return populateCpu(app).then(populateCpuMetrics).then(populateMem).then(populateMemMetrics).then(populateRoute);
 }
 
 async function populateCpu (app: Application): Promise<Application> {
@@ -56,6 +56,28 @@ async function populateCpu (app: Application): Promise<Application> {
   });
 }
 
+async function populateCpuMetrics(app: Application): Promise<Application> {
+  const query = `/api/prometheus/api/v1/query_range?query=avg_over_time(process_cpu_usage{service="${app.metadata.name}", namespace="${app.metadata.namespace}"}[1m]) * 100 / avg_over_time(system_cpu_usage[1m])&start=${Math.floor(Date.now() / 1000) - 3600}&end=${Math.floor(Date.now() / 1000)}&step=60`;
+  
+  return consoleFetchJSON(query).then((res) => {
+    let newApp: Application = {...app};
+
+    if (res && res.data && res.data.result && res.data.result.length > 0) {
+      newApp.metrics = newApp.metrics || {};
+      newApp.metrics.cpu = res.data.result[0].values.map(value => ({
+        name: newApp.metadata.name,
+        x: value[0],
+        y: value[1]
+      }));
+    }
+    console.log('Cpu Metrics:'+ JSON.stringify(newApp.metrics.cpu));
+    return newApp;
+  }).catch(error => {
+    console.error('Error fetching CPU metrics:', error);
+    return app; // Return the original app object in case of error
+  });
+}
+
 async function populateMem (app: Application): Promise<Application>  {
   return consoleFetchJSON('/api/prometheus/api/v1/query?query=sum(jvm_memory_used_bytes{namespace="' + app.metadata.namespace + '", service="' +  app.metadata.name + '"} / (1024 * 1024))').then((res) => {
     let newApp: Application = {...app};
@@ -63,6 +85,29 @@ async function populateMem (app: Application): Promise<Application>  {
       newApp.memory=sprintf('%.2f MB', res.data.result[0].value[1]);
     }
     return newApp;
+  });
+}
+
+async function populateMemMetrics(app: Application): Promise<Application> {
+  const query = `/api/prometheus/api/v1/query_range?query=sum(jvm_memory_used_bytes{namespace="${app.metadata.namespace}", service="${app.metadata.name}"} / (1024 * 1024))&start=${Math.floor(Date.now() / 1000) - 3600}&end=${Math.floor(Date.now() / 1000)}&step=60`;
+  
+  return consoleFetchJSON(query).then((res) => {
+    let newApp: Application = {...app};
+
+    if (res && res.data && res.data.result && res.data.result.length > 0) {
+      newApp.metrics = newApp.metrics || {};
+      newApp.metrics.memory = res.data.result[0].values.map(value => ({
+        name: newApp.metadata.name,
+        x: value[0],
+        y: value[1]
+      }));
+    }
+
+    console.log('Memory metrics:' + JSON.stringify(newApp.metrics.memory));
+    return newApp;
+  }).catch(error => {
+    console.error('Error fetching memory metrics:', error);
+    return app; // Return the original app object in case of error
   });
 }
 
@@ -102,6 +147,12 @@ export async function fetchApplication(ns: string, name: string): Promise<Applic
   return Promise.all([fetchDeployment(ns, name), fetchDeploymentConfig(ns, name)]).then(([deployment, deploymentConfig]) => {
     return deployment || deploymentConfig;
   }).then(populateRoute);
+}
+
+export async function fetchApplicationWithMetrics(ns: string, name: string): Promise<Application> {
+  return Promise.all([fetchDeployment(ns, name), fetchDeploymentConfig(ns, name)]).then(([deployment, deploymentConfig]) => {
+    return deployment || deploymentConfig;
+  }).then(populateRoute).then(populateCpuMetrics).then(populateMemMetrics);
 }
 
 const QuarkusService = {

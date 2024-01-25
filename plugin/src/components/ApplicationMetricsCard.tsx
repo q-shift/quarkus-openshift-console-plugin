@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Card,
   CardBody,
@@ -11,20 +11,25 @@ import ApplicationsMemoryGraph from './ApplicationsMemoryGraph';
 
 const ApplicationMetricsCard: React.FC<{application: Application }> = ({ application }) => {
 
+  const [applications, setApplications] = useState<Application[]>([]);
   useEffect(() => {
+    const newApplications: Application[] = [application]; 
+    setApplications(newApplications);
   }, [application]);
 
   return (
     <Card>
       <CardTitle>Metrics</CardTitle>
+      {applications &&
       <CardBody style={{ display: 'flex', flexDirection: 'row' }}>
         <div style={{ flex: 1 }}>
-          <ApplicationsCPUGraph applications={[application]} />
+          <ApplicationsCPUGraph applications={applications} />
         </div>
         <div style={{ flex: 1 }}>
-          <ApplicationsMemoryGraph applications={[application]} />
+          <ApplicationsMemoryGraph applications={applications} />
         </div>
       </CardBody>
+    }
     </Card>
   );
 };
