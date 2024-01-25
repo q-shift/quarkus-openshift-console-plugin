@@ -19,7 +19,7 @@ import ApplicationDetailsCard from '../components/ApplicationDetailsCard';
 import ApplicationAlertsCard from '../components/ApplicationAlertsCard';
 import ApplicationMetricsCard from '../components/ApplicationMetricsCard';
 import ApplicationLoggingCard from '../components/ApplicationLoggingCard';
-
+import ApplicationConfigurationCard from '../components/ApplicationConfigurationCard';
 import './quarkus.css';
 
 export const ApplicationPage: React.FC<ApplicationPageProps> = ( {match} ) => {
@@ -52,14 +52,14 @@ export const ApplicationPage: React.FC<ApplicationPageProps> = ( {match} ) => {
         <PageSection variant="light">
           <Tabs activeKey={activeTabKey} onSelect={handleTabClick}>
             <Tab eventKey={0} title={<TabTitleText>Details</TabTitleText>}>
-              <TabContent id="1" title="Tab1">
+              <TabContent id="0" title="Details">
                 <PageSection variant="light">
                   <ApplicationDetailsCard application={application} />
                 </PageSection>
               </TabContent>
             </Tab>
             <Tab eventKey={1} title={<TabTitleText>Metrics</TabTitleText>}>
-              <TabContent id="2" title="Metrics">
+              <TabContent id="1" title="Metrics">
                 <PageSection variant="light">
                   <ApplicationMetricsCard application={application} />
                 </PageSection>
@@ -72,8 +72,15 @@ export const ApplicationPage: React.FC<ApplicationPageProps> = ( {match} ) => {
                 </PageSection>
               </TabContent>
             </Tab>
-            <Tab eventKey={3} title={<TabTitleText>Logging</TabTitleText>}>
-              <TabContent id="3" title="Logging">
+            <Tab eventKey={3} title={<TabTitleText>Configuration</TabTitleText>}>
+              <TabContent id="3" title="Configuration">
+                <PageSection variant="light">
+                  <ApplicationConfigurationCard application={application} />
+                </PageSection>
+              </TabContent>
+            </Tab>
+            <Tab eventKey={4} title={<TabTitleText>Logging</TabTitleText>}>
+              <TabContent id="4" title="Logging">
                 <PageSection variant="light">
                   <ApplicationLoggingCard application={application} />
                 </PageSection>
