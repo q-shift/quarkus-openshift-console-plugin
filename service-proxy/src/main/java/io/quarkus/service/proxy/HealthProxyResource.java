@@ -11,7 +11,7 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Response;
  
-@Path("/info")
+@Path("/health")
 public class HealthProxyResource {
 
   private Logger log = Logger.getLogger(HealthProxyResource.class);
@@ -28,7 +28,7 @@ public class HealthProxyResource {
   public Response proxy(String namespace, String name, String path) {
        WebClient client = WebClient.create(vertx);
        String fullPath = path.startsWith("/") ? path : "/" + path;
-       log.info("Proxying info endpint: http://" + name + "." + namespace + fullPath);
+       log.info("Proxying health endpint: http://" + name + "." + namespace + fullPath);
        return client
             .get(80, name + "." + namespace, fullPath)
             .send()
