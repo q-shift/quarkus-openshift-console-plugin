@@ -51,6 +51,7 @@ export const QuarkusPage: React.FC<QuarkusHomePageProps> = ({ match }) => {
         </PageSection>
         <PageSection variant="light">
           <Card>
+            {applications && applications.length > 0 &&
              <CardBody style={{ display: 'flex', flexDirection: 'row' }}>
                <div style={{ flex: 1 }}>
                  <ApplicationsCPUGraph applications={applications} />
@@ -59,6 +60,7 @@ export const QuarkusPage: React.FC<QuarkusHomePageProps> = ({ match }) => {
                  <ApplicationsMemoryGraph applications={applications} />
                </div>
              </CardBody>
+          }
            </Card>
         </PageSection>
       </Page>
