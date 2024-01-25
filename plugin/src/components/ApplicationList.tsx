@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom';
 import { Table, Thead, Tr, Th, Td, Tbody } from '@patternfly/react-table';
 import { Application } from "../types";
 import Status from "@openshift-console/dynamic-plugin-sdk/lib/app/components/status/Status";
+import { Button, Select, SelectOption, TextInputGroup, TextInputGroupMain, TextInputGroupUtilities, Toolbar, ToolbarContent, ToolbarGroup, ToolbarItem, ToolbarToggleGroup } from "@patternfly/react-core";
+import { FilterIcon, SearchIcon, TimesIcon } from "@patternfly/react-icons";
 interface ApplicationListProps {
   apps: Application[];
 }
@@ -34,6 +36,74 @@ export const ApplicationList: React.FC<ApplicationListProps> = ({ apps }) => {
       setSortDirection("asc");
     }
   };
+
+  //
+  // Filtering
+  //
+  const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
+  const [inputValue, setInputValue] = useState('');
+  const showClearButton = !!inputValue;
+  const showUtilities = showClearButton;
+  const clearInput = () => {
+    setInputValue('');
+  };
+
+  const handleInputChange = (value: string, event: React.FormEvent<HTMLInputElement>) => {
+    //get text from event and set it to inputValue
+    if (event && event.currentTarget && event.currentTarget.value) {
+      setInputValue(event.currentTarget.value);
+    } else {
+      setInputValue(value);
+    }
+  };
+  //
+  const onDelete = () => {
+
+  }
+
+  const onCategoryToggle = () => {
+    setIsCategoryDropdownOpen(!isCategoryDropdownOpen);
+  }
+
+  const onCategorySelect = () => {
+    
+  }
+
+  const buildCategoryDropdown = () => {
+    const categoryMenuItems = [
+      <SelectOption key="name" value="Name">Name</SelectOption>,
+      <SelectOption key="level" value="Namespace">Namespace</SelectOption>
+    ];
+
+    return (
+      <ToolbarItem>
+        <Select
+          onSelect={onCategorySelect}
+          onToggle={onCategoryToggle}
+          isOpen={isCategoryDropdownOpen}>
+          {categoryMenuItems}
+        </Select>
+      </ToolbarItem>
+    );
+  }
+
+  const buildFilterDropdown = () => {
+  return (
+    <TextInputGroup>
+      <TextInputGroupMain icon={<SearchIcon />} value={inputValue} onChange={handleInputChange} />
+      {showUtilities && (
+        <TextInputGroupUtilities>
+          {showClearButton && (
+            <Button variant="plain" onClick={clearInput} aria-label="Clear button and input">
+              <TimesIcon />
+            </Button>
+          )}
+        </TextInputGroupUtilities>
+      )}
+    </TextInputGroup>
+  );
+  }
+
 
   useEffect(() => {
    //refresh 
@@ -70,6 +140,20 @@ export const ApplicationList: React.FC<ApplicationListProps> = ({ apps }) => {
   });
   
   return (
+    <>
+        <Toolbar id="toolbar-with-chip-groups" clearAllFilters={onDelete} collapseListedFiltersBreakpoint="xl">
+          <ToolbarContent>
+            <ToolbarToggleGroup toggleIcon={<FilterIcon />} breakpoint="xl">
+              <ToolbarGroup
+                variant="filter-group"
+                style={{ lineHeight: '22px', alignItems: 'center' } as React.CSSProperties}>
+                {buildCategoryDropdown()}
+                {buildFilterDropdown()}
+              </ToolbarGroup>
+            </ToolbarToggleGroup>
+          </ToolbarContent>
+        </Toolbar>
+
     <Table>
       <Thead>
         <Tr>
@@ -148,6 +232,7 @@ export const ApplicationList: React.FC<ApplicationListProps> = ({ apps }) => {
         ))}
       </Tbody>
     </Table>
+    </>
   );
 };
 
