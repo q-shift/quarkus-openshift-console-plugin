@@ -20,6 +20,7 @@ import ApplicationAlertsCard from '../components/ApplicationAlertsCard';
 import ApplicationMetricsCard from '../components/ApplicationMetricsCard';
 import ApplicationLoggingCard from '../components/ApplicationLoggingCard';
 import ApplicationConfigurationCard from '../components/ApplicationConfigurationCard';
+import ApplicationProdUiCard from '../components/ApplicationProdUiCard';
 import './quarkus.css';
 
 export const ApplicationPage: React.FC<ApplicationPageProps> = ( {match} ) => {
@@ -86,6 +87,15 @@ export const ApplicationPage: React.FC<ApplicationPageProps> = ( {match} ) => {
                 </PageSection>
               </TabContent>
             </Tab>
+            {application && application.url &&
+            <Tab eventKey={5} title={<TabTitleText>Prod UI</TabTitleText>}>
+              <TabContent id="5" title="Prod UI">
+                <PageSection variant="light">
+                  <ApplicationProdUiCard application={application} />
+                </PageSection>
+              </TabContent>
+            </Tab>
+            }
           </Tabs>
         </PageSection>
       </Page>
