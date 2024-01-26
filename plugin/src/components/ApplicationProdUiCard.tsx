@@ -10,7 +10,6 @@ const ApplicationProdUiCard: React.FC<{application: Application }> = ({ applicat
   }, [application]);
 
   return (
-        <div>
           <iframe
             title="Quarkus Production UI"
             src={url}
@@ -18,7 +17,6 @@ const ApplicationProdUiCard: React.FC<{application: Application }> = ({ applicat
             height="600"
             frameBorder="0"
             allowFullScreen />
-        </div>
   );
 };
 
