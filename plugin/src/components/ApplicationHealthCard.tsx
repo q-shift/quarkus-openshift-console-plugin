@@ -8,8 +8,9 @@ import {
   TextContent,
 } from '@patternfly/react-core';
 import { Application } from '../types';
+import Status from '@openshift-console/dynamic-plugin-sdk/lib/app/components/status/Status';
 
-const ApplicationAlertsCard: React.FC<{ application: Application }> = ({ application }) => {
+const ApplicationHealthCard: React.FC<{ application: Application }> = ({ application }) => {
   const [probes, setProbes] = useState<{
     readinessProbe: string | null;
     livenessProbe: string | null;
@@ -33,16 +34,16 @@ const ApplicationAlertsCard: React.FC<{ application: Application }> = ({ applica
 
   return (
     <Card>
-      <CardTitle>Alerts</CardTitle>
+      <CardTitle>Health</CardTitle>
       <CardBody>
         <TextContent>
-          <Text component="p">Readiness Probe: {probes.readinessProbe || 'N/A'}</Text>
-          <Text component="p">Liveness Probe: {probes.livenessProbe || 'N/A'}</Text>
-          <Text component="p">Startup Probe: {probes.startupProbe || 'N/A'}</Text>
+          <Text component="p">Startup Probe: <Status title={probes.startupProbe || 'N/A'} status={probes.startupProbe && application.status.availableReplicas === application.status.replicas ? "Succeeded" : "Failed"}/></Text>
+          <Text component="p">Readiness Probe: <Status title={probes.readinessProbe || 'N/A'} status={probes.readinessProbe && application.status.availableReplicas === application.status.replicas ? "Succeeded" : "Failed"}/></Text>
+          <Text component="p">Liveness Probe: <Status title={probes.livenessProbe || 'N/A'} status={probes.livenessProbe && application.status.availableReplicas === application.status.replicas ? "Succeeded" : "Failed"}/></Text>
         </TextContent>
       </CardBody>
     </Card>
   );
 };
 
-export default ApplicationAlertsCard;
+export default ApplicationHealthCard;

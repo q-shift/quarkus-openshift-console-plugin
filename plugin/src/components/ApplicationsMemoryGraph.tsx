@@ -32,9 +32,6 @@ const ApplicationMemoryGraph: React.FC<{applications: Application[] }> = ({ appl
         {data && legendData && legendData.length > 0 &&
         <Chart ariaTitle="Memory Usage"
           containerComponent={<ChartVoronoiContainer labels={({ datum }) => `${datum.name}: ${datum.y}`} constrainToVisibleArea />}
-          legendData={legendData}
-          legendOrientation="vertical"
-          legendPosition="right"
           domainPadding={{ y: 10 }}
           height={200}
           padding={{
@@ -46,7 +43,7 @@ const ApplicationMemoryGraph: React.FC<{applications: Application[] }> = ({ appl
           width={600}
           theme={graphTheme}>
           <ChartAxis dependentAxis tickCount={3}/>
-          <ChartAxis showGrid tickValues={[20, 30, 60]}/>
+          <ChartAxis showGrid tickValues={[10, 20, 30, 40, 50, 60]}/>
           <ChartGroup>
             {data && data.map(d =>
               <ChartLine data={d}/>

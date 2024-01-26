@@ -57,7 +57,8 @@ async function populateCpu (app: Application): Promise<Application> {
 }
 
 async function populateCpuMetrics(app: Application): Promise<Application> {
-  const query = `/api/prometheus/api/v1/query_range?query=avg_over_time(process_cpu_usage{service="${app.metadata.name}", namespace="${app.metadata.namespace}"}[1m]) * 100 / avg_over_time(system_cpu_usage[1m])&start=${Math.floor(Date.now() / 1000) - 3600}&end=${Math.floor(Date.now() / 1000)}&step=60`;
+  const currentTimeInSeconds = Math.floor(Date.now() / 1000);
+  const query = `/api/prometheus/api/v1/query_range?query=avg_over_time(process_cpu_usage{service="${app.metadata.name}", namespace="${app.metadata.namespace}"}[1m]) * 100 / avg_over_time(system_cpu_usage[1m])&start=${currentTimeInSeconds - 3600}&end=${currentTimeInSeconds}&step=60`;
   
   return consoleFetchJSON(query).then((res) => {
     let newApp: Application = {...app};
@@ -115,7 +116,58 @@ async function populateMemMetrics(app: Application): Promise<Application> {
   });
 }
 
-async function populateRoute(app: Application): Promise<Application>  {
+export async function populateGCPauseMetrics(app: Application): Promise<Application> {
+  const currentTimeInSeconds = Math.floor(Date.now() / 1000);
+  const query = `/api/prometheus/api/v1/query_range?query=avg_over_time(jvm_gc_pause_seconds_count{namespace="${app.metadata.namespace}", service="${app.metadata.name}"} / (1024 * 1024))&start=${currentTimeInSeconds - 3600}&end=${currentTimeInSeconds}&step=60`;
+  
+  return consoleFetchJSON(query).then((res) => {
+    let newApp: Application = {...app};
+
+    if (res && res.data && res.data.result && res.data.result.length > 0) {
+      const sortedValues = res.data.result[0].values.sort((a, b) => a[0] - b[0]); // Sort by timestamp
+
+      newApp.metrics = newApp.metrics || {};
+      newApp.metrics.gcPause = sortedValues.map((value, index) => ({
+        name: newApp.metadata.name,
+        x: index + 1,  // Map the index to values from 1 to 60
+        y: sprintf('%.2f', value[1])
+      }));
+    }
+
+    console.log('GC Pause metrics:' + JSON.stringify(newApp.metrics.memory));
+    return newApp;
+  }).catch(error => {
+    console.error('Error fetching memory metrics:', error);
+    return app; // Return the original app object in case of error
+  });
+}
+
+export async function populateGCOverheadMetrics(app: Application): Promise<Application> {
+  const currentTimeInSeconds = Math.floor(Date.now() / 1000);
+  const query = `/api/prometheus/api/v1/query_range?query=avg_over_time(jvm_gc_overhead_percent{service="${app.metadata.name}", namespace="${app.metadata.namespace}"}[1m]) * 100 / avg_over_time(system_cpu_usage[1m])&start=${currentTimeInSeconds - 3600}&end=${currentTimeInSeconds}&step=60`;
+  return consoleFetchJSON(query).then((res) => {
+    let newApp: Application = {...app};
+
+    if (res && res.data && res.data.result && res.data.result.length > 0) {
+      const sortedValues = res.data.result[0].values.sort((a, b) => a[0] - b[0]); // Sort by timestamp
+
+      newApp.metrics = newApp.metrics || {};
+      newApp.metrics.gcOverhead = sortedValues.map((value, index) => ({
+        name: newApp.metadata.name,
+        x: index + 1,  // Map the index to values from 1 to 60
+        y: sprintf('%.2f', value[1])
+      }));
+    }
+
+    console.log('GC Overhead metrics:' + JSON.stringify(newApp.metrics.memory));
+    return newApp;
+  }).catch(error => {
+    console.error('Error fetching memory metrics:', error);
+    return app; // Return the original app object in case of error
+  });
+}
+
+export async function populateRoute(app: Application): Promise<Application>  {
   return consoleFetchJSON('/api/kubernetes/apis/route.openshift.io/v1/namespaces/' + app.metadata.namespace + '/routes/'+ app.metadata.name).then((route: RouteKind) => {
     let newApp: Application = {...app};
     const protocol = route.spec.tls ? 'https' : 'http';
@@ -161,6 +213,11 @@ export async function fetchApplicationWithMetrics(ns: string, name: string): Pro
 
 const QuarkusService = {
   fetchApplications,
-  fetchApplicationsWithMetrics
+  fetchApplicationsWithMetrics,
+  populateCpuMetrics,
+  populateMemMetrics,
+  populateGCOverheadMetrics,
+  populateGCPauseMetrics,
+  populateRoute,
 }
 export default QuarkusService;

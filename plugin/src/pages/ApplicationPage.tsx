@@ -16,7 +16,7 @@ import { useEffect, useState } from 'react';
 import { Application } from '../types';
 import { fetchApplicationWithMetrics } from '../services/QuarkusService';
 import ApplicationDetailsCard from '../components/ApplicationDetailsCard';
-import ApplicationAlertsCard from '../components/ApplicationAlertsCard';
+import ApplicationHealthCard from '../components/ApplicationHealthCard';
 import ApplicationMetricsCard from '../components/ApplicationMetricsCard';
 import ApplicationLoggingCard from '../components/ApplicationLoggingCard';
 import ApplicationConfigurationCard from '../components/ApplicationConfigurationCard';
@@ -66,10 +66,10 @@ export const ApplicationPage: React.FC<ApplicationPageProps> = ( {match} ) => {
                 </PageSection>
               </TabContent>
             </Tab>
-            <Tab eventKey={2} title={<TabTitleText>Alerts</TabTitleText>}>
-              <TabContent id="2" title="Alerts">
+            <Tab eventKey={2} title={<TabTitleText>Health</TabTitleText>}>
+              <TabContent id="2" title="Health">
                 <PageSection variant="light">
-                  <ApplicationAlertsCard application={application} />
+                  <ApplicationHealthCard application={application} />
                 </PageSection>
               </TabContent>
             </Tab>

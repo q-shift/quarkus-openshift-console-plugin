@@ -8,8 +8,9 @@ import { Application } from '../types';
 import { Chart, ChartAxis, ChartGroup, ChartLine, ChartVoronoiContainer } from '@patternfly/react-charts';
 import { useEffect, useState } from 'react';
 import { graphTheme } from '../theme';
+import { populateGCPauseMetrics } from '../services/QuarkusService';
 
-const ApplicationCPUGraph: React.FC<{applications: Application[] }> = ({ applications }) => {
+const ApplicationGcPauseGraph: React.FC<{applications: Application[] }> = ({ applications }) => {
   const [data, setData] = useState([[]]);
   const [legendData, setLegendData] = useState([]);
 
@@ -17,8 +18,10 @@ const ApplicationCPUGraph: React.FC<{applications: Application[] }> = ({ applica
     const newData = new Array(applications.length);
     const newLegendData = new Array(applications.length);
     applications.filter(app => app && app.metrics.cpu).forEach((app, index) => {
-      newData[index] = app.metrics.cpu;
-      newLegendData[index] = {name: app.metadata.name};
+      populateGCPauseMetrics(app).then((appWithMetrics) => {
+        newData[index] = appWithMetrics.metrics.gcPause;
+        newLegendData[index] = {name: app.metadata.name};
+      })
     });
     setData(newData);
     setLegendData(newLegendData);
@@ -27,10 +30,10 @@ const ApplicationCPUGraph: React.FC<{applications: Application[] }> = ({ applica
 
   return (
     <Card>
-      <CardTitle>CPU</CardTitle>
+      <CardTitle>Gc Pause</CardTitle>
       <CardBody>
         {data && legendData && legendData.length > 0 &&
-        <Chart ariaTitle="CPU Usage"
+        <Chart ariaTitle="Gc Pause"
           containerComponent={<ChartVoronoiContainer labels={({ datum }) => `${datum.name}: ${datum.y}`} constrainToVisibleArea />}
           domainPadding={{ y: 10 }}
           height={200}
@@ -56,4 +59,4 @@ const ApplicationCPUGraph: React.FC<{applications: Application[] }> = ({ applica
   );
 };
 
-export default ApplicationCPUGraph;
+export default ApplicationGcPauseGraph;

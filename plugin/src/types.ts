@@ -11,6 +11,8 @@ export type Snapshot = {
 export type Metrics = {
   cpu?: Snapshot[];
   memory?: Snapshot[];
+  gcPause?: Snapshot[];
+  gcOverhead?: Snapshot[];
 };
 
 
@@ -43,6 +45,8 @@ export function deploymentToApplication(deployment: DeploymentKind): Application
     metrics: {
       cpu: [],
       memory: [],
+      gcPause: [],
+      gcOverhead: [],
     },
     status: {
       ...deployment.status,
@@ -61,6 +65,8 @@ export function deploymentConfigToApplication(deployment: DeploymentConfigKind):
     metrics: {
       cpu: [],
       memory: [],
+      gcPause: [],
+      gcOverhead: [],
     },
     status: {
       ...deployment.status,
