@@ -15,6 +15,11 @@ import {
   TextInputGroupMain,
   TextInputGroupUtilities,
   Button,
+  Tabs,
+  Tab,
+  TabContent,
+  PageSection,
+  TabTitleText,
 } from '@patternfly/react-core';
 import FilterIcon from '@patternfly/react-icons/dist/esm/icons/filter-icon';
 import { SearchIcon } from '@patternfly/react-icons/dist/esm/icons/search-icon';
@@ -36,7 +41,11 @@ const ApplicationLoggingCard: React.FC<{application: Application }> = ({ applica
   const [selected, setSelected] = useState('INFO');
   const [loggers, _] = useState<Logger[]>([{name: 'root', level: 'INFO'}]);
 
-//  const [currentCategory, setCurrentCategory] = useState('Name');
+  const [activeTabKey, setActiveTabKey] = useState(0);
+
+  const handleTabClick = (event, tabIndex) => {
+    setActiveTabKey(tabIndex);
+  };
 
   useEffect(() => {
   }, [application]);
@@ -70,7 +79,7 @@ const ApplicationLoggingCard: React.FC<{application: Application }> = ({ applica
   }
 
   const onCategorySelect = () => {
-    
+
   }
 
   const buildCategoryDropdown = () => {
@@ -92,65 +101,78 @@ const ApplicationLoggingCard: React.FC<{application: Application }> = ({ applica
   }
 
   const buildFilterDropdown = () => {
-  return (
-    <TextInputGroup>
-      <TextInputGroupMain icon={<SearchIcon />} value={inputValue} onChange={handleInputChange} />
-      {showUtilities && (
-        <TextInputGroupUtilities>
-          {showClearButton && (
-            <Button variant="plain" onClick={clearInput} aria-label="Clear button and input">
-              <TimesIcon />
-            </Button>
-          )}
-        </TextInputGroupUtilities>
-      )}
-    </TextInputGroup>
-  );
+    return (
+      <TextInputGroup>
+        <TextInputGroupMain icon={<SearchIcon />} value={inputValue} onChange={handleInputChange} />
+        {showUtilities && (
+          <TextInputGroupUtilities>
+            {showClearButton && (
+              <Button variant="plain" onClick={clearInput} aria-label="Clear button and input">
+                <TimesIcon />
+              </Button>
+            )}
+          </TextInputGroupUtilities>
+        )}
+      </TextInputGroup>
+    );
   }
 
   return (
     <Card>
       <CardTitle>Logging</CardTitle>
       <CardBody>
-        <Toolbar id="toolbar-with-chip-groups" clearAllFilters={onDelete} collapseListedFiltersBreakpoint="xl">
-          <ToolbarContent>
-            <ToolbarToggleGroup toggleIcon={<FilterIcon />} breakpoint="xl">
-              <ToolbarGroup
-                variant="filter-group"
-                style={{ lineHeight: '22px', alignItems: 'center' } as React.CSSProperties}>
-                {buildCategoryDropdown()}
-                {buildFilterDropdown()}
-              </ToolbarGroup>
-            </ToolbarToggleGroup>
-          </ToolbarContent>
-        </Toolbar>
-        <Table>
-          <Thead>
-            <Tr>
-              <Th>Name</Th>
-              <Th>Level</Th>
-            </Tr>
-          </Thead>
+        <Tabs activeKey={activeTabKey} onSelect={handleTabClick}>
+          <Tab eventKey={0} title={<TabTitleText>Loggers</TabTitleText>}>
+            <TabContent id="0" title="Loggers">
+              <Toolbar id="toolbar-with-chip-groups" clearAllFilters={onDelete} collapseListedFiltersBreakpoint="xl">
+                <ToolbarContent>
+                  <ToolbarToggleGroup toggleIcon={<FilterIcon />} breakpoint="xl">
+                    <ToolbarGroup
+                      variant="filter-group"
+                      style={{ lineHeight: '22px', alignItems: 'center' } as React.CSSProperties}>
+                      {buildCategoryDropdown()}
+                      {buildFilterDropdown()}
+                    </ToolbarGroup>
+                  </ToolbarToggleGroup>
+                </ToolbarContent>
+              </Toolbar>
+              <Table>
+                <Thead>
+                  <Tr>
+                    <Th>Name</Th>
+                    <Th>Level</Th>
+                  </Tr>
+                </Thead>
 
-          <Tbody>
-            {loggers.map((logger) => (
-              <Tr>
-                <Td>{logger.name}</Td>
-                <Td>
-                  <ToggleGroup aria-label="Log levels">
-                    {logLevels.map((level) => (
-                      <ToggleGroupItem
-                        text={level}
-                        buttonId={level}
-                        isSelected={selected === level}
-                        onChange={() => setSelected(level)} />
-                    ))}
-                  </ToggleGroup>
-                </Td>
-              </Tr>
-            ))}
-          </Tbody>
-        </Table>
+                <Tbody>
+                  {loggers.map((logger) => (
+                    <Tr>
+                      <Td>{logger.name}</Td>
+                      <Td>
+                        <ToggleGroup aria-label="Log levels">
+                          {logLevels.map((level) => (
+                            <ToggleGroupItem
+                              text={level}
+                              buttonId={level}
+                              isSelected={selected === level}
+                              onChange={() => setSelected(level)} />
+                          ))}
+                        </ToggleGroup>
+                      </Td>
+                    </Tr>
+                  ))}
+                </Tbody>
+              </Table>
+
+            </TabContent>
+          </Tab>
+          <Tab eventKey={1} title={<TabTitleText>Logs</TabTitleText>}>
+            <TabContent id="1" title="Logs">
+              <PageSection variant="light">
+              </PageSection>
+            </TabContent>
+          </Tab>
+        </Tabs>
       </CardBody>
     </Card>
   );
