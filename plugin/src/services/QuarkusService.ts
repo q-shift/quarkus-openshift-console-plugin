@@ -63,11 +63,12 @@ async function populateCpuMetrics(app: Application): Promise<Application> {
     let newApp: Application = {...app};
 
     if (res && res.data && res.data.result && res.data.result.length > 0) {
+      const sortedValues = res.data.result[0].values.sort((a, b) => a[0] - b[0]); // Sort by timestamp
       newApp.metrics = newApp.metrics || {};
-      newApp.metrics.cpu = res.data.result[0].values.map(value => ({
+      newApp.metrics.cpu = sortedValues.map((value, index) => ({
         name: newApp.metadata.name,
-        x: value[0],
-        y: value[1]
+        x: index + 1,  // Map the index to values from 1 to 60
+        y: sprintf('%.2f', value[1])
       }));
     }
     console.log('Cpu Metrics:'+ JSON.stringify(newApp.metrics.cpu));
@@ -89,17 +90,20 @@ async function populateMem (app: Application): Promise<Application>  {
 }
 
 async function populateMemMetrics(app: Application): Promise<Application> {
-  const query = `/api/prometheus/api/v1/query_range?query=sum(jvm_memory_used_bytes{namespace="${app.metadata.namespace}", service="${app.metadata.name}"} / (1024 * 1024))&start=${Math.floor(Date.now() / 1000) - 3600}&end=${Math.floor(Date.now() / 1000)}&step=60`;
+  const currentTimeInSeconds = Math.floor(Date.now() / 1000);
+  const query = `/api/prometheus/api/v1/query_range?query=sum(jvm_memory_used_bytes{namespace="${app.metadata.namespace}", service="${app.metadata.name}"} / (1024 * 1024))&start=${currentTimeInSeconds - 3600}&end=${currentTimeInSeconds}&step=60`;
   
   return consoleFetchJSON(query).then((res) => {
     let newApp: Application = {...app};
 
     if (res && res.data && res.data.result && res.data.result.length > 0) {
+      const sortedValues = res.data.result[0].values.sort((a, b) => a[0] - b[0]); // Sort by timestamp
+
       newApp.metrics = newApp.metrics || {};
-      newApp.metrics.memory = res.data.result[0].values.map(value => ({
+      newApp.metrics.memory = sortedValues.map((value, index) => ({
         name: newApp.metadata.name,
-        x: value[0],
-        y: value[1]
+        x: index + 1,  // Map the index to values from 1 to 60
+        y: sprintf('%.2f', value[1])
       }));
     }
 
