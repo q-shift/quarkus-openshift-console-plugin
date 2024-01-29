@@ -1,5 +1,5 @@
 import { consoleFetchJSON } from '@openshift-console/dynamic-plugin-sdk';
-import { ConfigMapKind, DeploymentConfigKind, DeploymentKind, PersistentVolumeClaimKind, RouteKind, SecretKind } from '../k8s-types';
+import { ConfigMapKind, DeploymentConfigKind, DeploymentKind, JobKind, PersistentVolumeClaimKind, RouteKind, SecretKind } from '../k8s-types';
 import { Application, deploymentConfigToApplication, deploymentToApplication } from '../types';
 import { sprintf } from 'sprintf-js';
 import { quarkusApplicationStore } from '../state';
@@ -69,6 +69,23 @@ export async function fetchPvc(ns: string, name: string): Promise<PersistentVolu
   });
 }
 
+export async function fetchJobs(ns: string): Promise<JobKind[]>  {
+  return consoleFetchJSON('/api/kubernetes/apis/batch/v1/namespaces/' + ns + '/jobs/').then(res => {
+     console.log(JSON.stringify(res));
+     return res.items;
+  }).catch(_ => {
+    return null;
+  });
+}
+
+export async function fetchJob(ns: string, name: string): Promise<JobKind>  {
+  return consoleFetchJSON('/api/kubernetes/apis/batch/v1/namespaces/' + ns + '/jobs/' + name).then(res => {
+     console.log(JSON.stringify(res));
+     return res.data;
+  }).catch(_ => {
+    return null;
+  });
+}
 
 async function populateAdddionalInfo(app: Application): Promise<Application>  {
   return populateCpu(app).then(populateCpuMetrics).then(populateMem).then(populateMemMetrics).then(populateRoute);
@@ -249,6 +266,8 @@ const QuarkusService = {
   populateRoute,
   fetchSecret,
   fetchConfigMap,
-  fetchPvc
+  fetchPvc,
+  fetchJob,
+  fetchJobs
 }
 export default QuarkusService;

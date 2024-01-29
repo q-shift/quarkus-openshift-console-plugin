@@ -4,14 +4,13 @@ import {
   Card,
   CardBody,
   CardTitle,
-  List,
-  ListItem,
   Text,
   TextContent,
 } from '@patternfly/react-core';
 import { Application } from '../types';
 import Status from '@openshift-console/dynamic-plugin-sdk/lib/app/components/status/Status';
 import ApplicationVolumeHealthCard from './ApplicationVolumeHealthCard';
+import ApplicationJobsHealthCard from './ApplicationJobsHealthCard';
 
 const ApplicationHealthCard: React.FC<{ application: Application }> = ({ application }) => {
 
@@ -24,40 +23,6 @@ const ApplicationHealthCard: React.FC<{ application: Application }> = ({ applica
     livenessProbe: null,
     startupProbe: null,
   });
-
-  const kubernetesJobInfo = {
-    apiVersion: 'batch/v1',
-    kind: 'Job',
-    metadata: {
-      name: 'init-task-example-flyway-init',
-    },
-    spec: {
-      completionMode: 'NonIndexed',
-      template: {
-        metadata: {},
-        spec: {
-          containers: [
-            {
-              env: [
-                {
-                  name: 'QUARKUS_FLYWAY_ENABLED',
-                  value: 'true',
-                },
-                {
-                  name: 'QUARKUS_INIT_AND_EXIT',
-                  value: 'true',
-                },
-              ],
-              image: 'init-task-example:1.0.0-SNAPSHOT',
-              name: 'init-task-example-flyway-init',
-            },
-          ],
-          restartPolicy: 'OnFailure',
-          serviceAccountName: 'init-task-example',
-        },
-      },
-    },
-  };
 
   useEffect(() => {
     if (application && application.spec && application.spec.containers && application.spec.containers.length > 0) {
@@ -108,25 +73,7 @@ const ApplicationHealthCard: React.FC<{ application: Application }> = ({ applica
             </Card>
           </div>
           <div style={{ flex: 1 }}>
-            <Card>
-              <CardTitle>Jobs (mock)</CardTitle>
-              <CardBody>
-                <TextContent>
-                  <Text component="h3">init-task-example-flyway-init</Text>
-                  <Text component="p"><Status title="Failed" status="Failed"/></Text>
-                  <Text component="p">Completion Mode: {kubernetesJobInfo.spec.completionMode}</Text>
-                  <Text component="p">Container Image: {kubernetesJobInfo.spec.template.spec.containers[0].image}</Text>
-                  <Text component="p">Environment Variables:</Text>
-                  <List>
-                    {kubernetesJobInfo.spec.template.spec.containers[0].env.map((variable, index) => (
-                      <ListItem key={index}>
-                        <Text component="p">{variable.name}: {variable.value}</Text>
-                      </ListItem>
-                    ))}
-                  </List>
-                </TextContent>
-              </CardBody>
-            </Card>
+            <ApplicationJobsHealthCard application={application} />
           </div>
         </div>
       </CardBody>
