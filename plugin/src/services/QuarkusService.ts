@@ -244,16 +244,34 @@ export async function fetchApplicationsWithMetrics(ns: string): Promise<Applicat
     });
 }
 
-export async function fetchApplication(ns: string, name: string): Promise<Application> {
-  return Promise.all([fetchDeployment(ns, name), fetchDeploymentConfig(ns, name)]).then(([deployment, deploymentConfig]) => {
-    return deployment || deploymentConfig;
-  }).then(populateRoute);
+export async function fetchApplication(kind: string, ns: string, name: string): Promise<Application> {
+  let app: Promise<Application>;
+  switch (kind) {
+    case 'Deployment':
+      app = fetchDeployment(ns, name);
+      break;
+    case 'DeploymentConfig':
+      app = fetchDeploymentConfig(ns, name);
+      break;
+    default:
+      throw new Error('Invalid kind: ' + kind);
+  }
+  return app.then(populateRoute).then(populateCpuMetrics).then(populateMemMetrics);
 }
 
-export async function fetchApplicationWithMetrics(ns: string, name: string): Promise<Application> {
-  return Promise.all([fetchDeployment(ns, name), fetchDeploymentConfig(ns, name)]).then(([deployment, deploymentConfig]) => {
-    return deployment || deploymentConfig;
-  }).then(populateRoute).then(populateCpuMetrics).then(populateMemMetrics);
+export async function fetchApplicationWithMetrics(kind: string, ns: string, name: string): Promise<Application> {
+  let app: Promise<Application>;
+  switch (kind) {
+    case 'Deployment':
+      app = fetchDeployment(ns, name);
+      break;
+    case 'DeploymentConfig':
+      app = fetchDeploymentConfig(ns, name);
+      break;
+    default:
+      throw new Error('Invalid kind: ' + kind);
+  }
+  return app.then(populateRoute).then(populateCpuMetrics).then(populateMemMetrics);
 }
 
 const QuarkusService = {

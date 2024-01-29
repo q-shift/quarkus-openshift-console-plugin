@@ -17,6 +17,7 @@ export type Metrics = {
 
 
 export type Application = {
+  kind? : string;
   cpu?: string;
   memory?: string;
   url?: string;
@@ -36,6 +37,7 @@ export type Application = {
 
 export function deploymentToApplication(deployment: DeploymentKind): Application {
   return {
+    kind: 'Deployment',
     metadata: {
       ...deployment.metadata,
     },
@@ -56,6 +58,7 @@ export function deploymentToApplication(deployment: DeploymentKind): Application
 
 export function deploymentConfigToApplication(deployment: DeploymentConfigKind): Application {
   return {
+    kind: 'DeploymentConfig',
     metadata: {
       ...deployment.metadata,
     },
