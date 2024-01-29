@@ -1,5 +1,5 @@
 import { consoleFetchJSON } from '@openshift-console/dynamic-plugin-sdk';
-import { DeploymentConfigKind, DeploymentKind, RouteKind } from '../k8s-types';
+import { ConfigMapKind, DeploymentConfigKind, DeploymentKind, PersistentVolumeClaimKind, RouteKind, SecretKind } from '../k8s-types';
 import { Application, deploymentConfigToApplication, deploymentToApplication } from '../types';
 import { sprintf } from 'sprintf-js';
 import { quarkusApplicationStore } from '../state';
@@ -41,6 +41,34 @@ async function fetchDeploymentConfig(ns: string, name: string): Promise<Applicat
        return null;
   });
 }
+
+export async function fetchSecret(ns: string, name: string): Promise<SecretKind>  {
+  return consoleFetchJSON('/api/kubernetes/api/v1/namespaces/' + ns + '/secrets/' + name).then(res => {
+     console.log(JSON.stringify(res));
+     return res.data;
+  }).catch(_ => {
+    return null;
+  });
+}
+
+export async function fetchConfigMap(ns: string, name: string): Promise<ConfigMapKind>  {
+  return consoleFetchJSON('/api/kubernetes/api/v1/namespaces/' + ns + '/configmaps/' + name).then(res => {
+     console.log(JSON.stringify(res));
+     return res.data;
+  }).catch(_ => {
+    return null;
+  });
+}
+
+export async function fetchPvc(ns: string, name: string): Promise<PersistentVolumeClaimKind>  {
+  return consoleFetchJSON('/api/kubernetes/api/v1/namespaces/' + ns + '/persistentvolumeclaims/' + name).then(res => {
+     console.log(JSON.stringify(res));
+     return res.data;
+  }).catch(_ => {
+    return null;
+  });
+}
+
 
 async function populateAdddionalInfo(app: Application): Promise<Application>  {
   return populateCpu(app).then(populateCpuMetrics).then(populateMem).then(populateMemMetrics).then(populateRoute);
@@ -219,5 +247,8 @@ const QuarkusService = {
   populateGCOverheadMetrics,
   populateGCPauseMetrics,
   populateRoute,
+  fetchSecret,
+  fetchConfigMap,
+  fetchPvc
 }
 export default QuarkusService;

@@ -11,6 +11,7 @@ import {
 } from '@patternfly/react-core';
 import { Application } from '../types';
 import Status from '@openshift-console/dynamic-plugin-sdk/lib/app/components/status/Status';
+import ApplicationVolumeHealthCard from './ApplicationVolumeHealthCard';
 
 const ApplicationHealthCard: React.FC<{ application: Application }> = ({ application }) => {
 
@@ -88,21 +89,7 @@ const ApplicationHealthCard: React.FC<{ application: Application }> = ({ applica
             </Card>
           </div>
           <div style={{ flex: 1 }}>
-            <Card>
-              <CardTitle>Volumes (mock)</CardTitle>
-              <CardBody>
-                <Text component="h3" >app-config</Text>
-                <TextContent>
-                  <Text component="p">Type: ConfigMap</Text>
-                </TextContent>
-                <TextContent>
-                  <Text component="p">Path: /mnt/app/app-config.yaml</Text>
-                </TextContent>
-                <TextContent>
-                  <Text component="p"><Status title="available" status="Succeeded"/></Text>
-                </TextContent>
-              </CardBody>
-            </Card>
+            <ApplicationVolumeHealthCard application={application} />
           </div>
         </div>
 
