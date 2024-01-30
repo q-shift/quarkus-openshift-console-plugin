@@ -17,7 +17,7 @@
     "type": "console.page/route",
     "properties": {
       "exact": true,
-      "path": "/quarkus/details/:ns/:name",
+      "path": "/quarkus/application/:ns/:kind/:name",
       "component": { "$codeRef": "ApplicationPage" }
     }
   },

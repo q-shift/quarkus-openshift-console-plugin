@@ -25,9 +25,10 @@ import './quarkus.css';
 
 export const ApplicationPage: React.FC<ApplicationPageProps> = ( {match} ) => {
   const { t } = useTranslation('plugin__console-plugin-template');
-  const { ns, name } = match?.params || {};
+  const { ns, kind, name } = match?.params || {};
   const [selectedNamespace] = useState<string>(ns || 'all-namespaces');
   const [selectedName] = useState<string>(name || '');
+  const [selectedKind] = useState<string>(kind || 'Deployment');
   const [application, setApplication] = useState<Application>();
   const [activeTabKey, setActiveTabKey] = useState(0);
 
@@ -36,10 +37,10 @@ export const ApplicationPage: React.FC<ApplicationPageProps> = ( {match} ) => {
   };
 
   useEffect(() => {
-    fetchApplicationWithMetrics(selectedNamespace, selectedName).then((app: Application) => {
+    fetchApplicationWithMetrics(selectedKind, selectedNamespace, selectedName).then((app: Application) => {
       setApplication(app);
     })
-  }, [selectedNamespace, selectedName]);
+  }, [selectedNamespace, selectedKind, selectedName]);
   
   return (
     <>
@@ -106,6 +107,7 @@ export const ApplicationPage: React.FC<ApplicationPageProps> = ( {match} ) => {
 type ApplicationPageProps = {
   match: RMatch<{
     ns?: string;
+    kind?: string;
     name?: string;
   }>;
 };
