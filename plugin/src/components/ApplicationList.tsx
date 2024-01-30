@@ -21,7 +21,7 @@ export const ApplicationList: React.FC<ApplicationListProps> = ({ apps }) => {
   };
 
   //const devUiUrl = (app) => `/api/proxy/plugin/quarkus-openshift-console-plugin/service-proxy/produi/${app.metadata.namespace}/${app.metadata.name}/`
-  const detailsUrl = (app) => `/quarkus/details/${app.metadata.namespace}/${app.metadata.name}`
+  const applicationUrl = (app) => `/quarkus/application/${app.metadata.namespace}/${app.kind}/${app.metadata.name}`
 
   const [sortColumn, setSortColumn] = useState("name"); // Default sorting column
   const [sortDirection, setSortDirection] = useState("asc"); // Default sorting direction (ascending)
@@ -251,7 +251,7 @@ export const ApplicationList: React.FC<ApplicationListProps> = ({ apps }) => {
           {sortedApps && sortedApps.filter(app => app.metadata && app.metadata.name && app.metadata.namespace).map((app, index) => (
             <Tr key={app.metadata.name}>
               <Td dataLabel={columnNames.name}>
-                <Link to={detailsUrl(app)}>
+                <Link to={applicationUrl(app)}>
                   {app.metadata.name}
                 </Link>
               </Td>
