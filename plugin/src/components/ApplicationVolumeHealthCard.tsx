@@ -17,10 +17,10 @@ import { ConfigMapKind, PersistentVolumeClaimKind, SecretKind } from 'k8s-types'
 const ApplicationHealthCard: React.FC<{ application: Application }> = ({ application }) => {
 
   const [volumes, setVolumes] = useState(application && application.spec ? application.spec.volumes : []);
-  const [volumeStatus, setVolumeStatus] = useState(application && application.spec ? application.spec.volumes.map(v => "Pending") : []);
+  const [volumeStatus, setVolumeStatus] = useState(application && application.spec && application.spec.volumes ? application.spec.volumes.map(v => "Pending") : []);
 
   useEffect(() => {
-    setVolumes(application && application.spec ? application.spec.volumes : []);
+    setVolumes(application && application.spec && application.spec.volumes ? application.spec.volumes : []);
   }, [application]);
 
   useEffect(() => {
@@ -59,7 +59,7 @@ const ApplicationHealthCard: React.FC<{ application: Application }> = ({ applica
       <CardTitle>Volumes</CardTitle>
       <CardBody>
         <List isPlain isBordered>
-          {application && application.spec.volumes.map((volume, index) => (
+          {application && application.spec && application.spec.volumes && application.spec.volumes.map((volume, index) => (
             <ListItem key={index}>  
               <Text component="h3" >{volume.name}</Text>
               <TextContent>
