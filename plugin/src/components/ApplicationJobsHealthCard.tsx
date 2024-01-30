@@ -35,7 +35,6 @@ const ApplicationJobsHealthCard: React.FC<{ application: Application }> = ({ app
     }
   }, [application]);
 
-
   return (
     <Card>
       <CardTitle>Jobs</CardTitle>
@@ -46,11 +45,11 @@ const ApplicationJobsHealthCard: React.FC<{ application: Application }> = ({ app
               <Text component="h3" >{job.metadata.name}</Text>
               {job.spec.template.spec.containers.map((container) => (
                 <>
-                  <TextContent>Name: {container.name}</TextContent>
-                  <TextContent>Image: {container.image}</TextContent>
-                  <TextContent>Command: {container.command}</TextContent>
-                  <TextContent>Args: {container.args}</TextContent>
-                  </>
+                  <TextContent><strong>Name:</strong> {container.name}</TextContent>
+                  <TextContent><strong>Image:</strong> {trimImage(container.image)}</TextContent>
+                  <TextContent><strong>Command:</strong> {container.command}</TextContent>
+                  <TextContent><strong>Args:</strong> {container.args}</TextContent>
+                </>
               ))}
               <TextContent>
                 Status:
@@ -65,6 +64,14 @@ const ApplicationJobsHealthCard: React.FC<{ application: Application }> = ({ app
     </Card>
   );
 };
+
+const trimImage = (image: string) => {
+  if (image.includes('@sha256')) {
+    const parts = image.split('@sha256:');
+    return parts[0] + "@sha256:" + parts[1].substring(0, 7);
+  }
+  return image;
+}
 
 const jobStatus = (job: JobKind) => {
   if (job.status.succeeded) {
