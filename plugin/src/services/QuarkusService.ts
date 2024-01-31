@@ -1,5 +1,5 @@
 import { consoleFetchJSON } from '@openshift-console/dynamic-plugin-sdk';
-import { ConfigMapKind, DeploymentConfigKind, DeploymentKind, JobKind, PersistentVolumeClaimKind, RouteKind, SecretKind } from '../k8s-types';
+import { ConfigMapKind, DeploymentConfigKind, DeploymentKind, JobKind, PersistentVolumeClaimKind, PodKind, RouteKind, SecretKind } from '../k8s-types';
 import { Application, deploymentConfigToApplication, deploymentToApplication } from '../types';
 import { sprintf } from 'sprintf-js';
 import { quarkusApplicationStore } from '../state';
@@ -244,6 +244,15 @@ export async function fetchApplicationsWithMetrics(ns: string): Promise<Applicat
     });
 }
 
+export async function fetchApplicationPods(ns: string, applicationName: string): Promise<PodKind[]>  {
+  return consoleFetchJSON('/api/kubernetes/api/v1/namespaces/' + ns + '/pods/').then(res => {
+     console.log(JSON.stringify(res));
+     return res.items.filter((pod) => { pod.metadata.labels['app.kubernetes.io/name'] === applicationName; });
+  }).catch(_ => {
+    return null;
+  });
+}
+
 export async function fetchApplication(kind: string, ns: string, name: string): Promise<Application> {
   let app: Promise<Application>;
   switch (kind) {
@@ -276,6 +285,7 @@ export async function fetchApplicationWithMetrics(kind: string, ns: string, name
 
 const QuarkusService = {
   fetchApplications,
+  fetchApplicationPods,
   fetchApplicationsWithMetrics,
   populateCpuMetrics,
   populateMemMetrics,

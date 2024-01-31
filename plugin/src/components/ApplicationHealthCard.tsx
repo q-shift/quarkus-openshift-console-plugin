@@ -11,6 +11,7 @@ import { Application } from '../types';
 import Status from '@openshift-console/dynamic-plugin-sdk/lib/app/components/status/Status';
 import ApplicationVolumeHealthCard from './ApplicationVolumeHealthCard';
 import ApplicationJobsHealthCard from './ApplicationJobsHealthCard';
+import ApplicationInitContainerHealthCard from './ApplicationInitContainerHealthCard';
 
 const ApplicationHealthCard: React.FC<{ application: Application }> = ({ application }) => {
 
@@ -57,20 +58,10 @@ const ApplicationHealthCard: React.FC<{ application: Application }> = ({ applica
             <ApplicationVolumeHealthCard application={application} />
           </div>
         </div>
-
         {/* Second Row */}
         <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap' }}>
           <div style={{ flex: 1 }}>
-            <Card>
-              <CardTitle>Init Containers (mock)</CardTitle>
-              <CardBody>
-                <TextContent>
-                  <Text component="h3">wait-for-flyway</Text>
-                  <Text component="p">Image: groundnuty/k8s-wait-for:no-root-v1.7</Text>
-                  <Text component="p"><Status title="pending" status="Pending"/></Text>
-                </TextContent>
-              </CardBody>
-            </Card>
+            <ApplicationInitContainerHealthCard application={application} />
           </div>
           <div style={{ flex: 1 }}>
             <ApplicationJobsHealthCard application={application} />
