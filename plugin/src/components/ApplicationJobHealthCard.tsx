@@ -14,7 +14,7 @@ import Status from '@openshift-console/dynamic-plugin-sdk/lib/app/components/sta
 import { fetchJobs } from '../services/QuarkusService';
 import { JobKind } from 'k8s-types';
 
-const ApplicationJobsHealthCard: React.FC<{ application: Application }> = ({ application }) => {
+const ApplicationJobHealthCard: React.FC<{ application: Application }> = ({ application }) => {
 
   const [jobs, setJobs] = useState([]);
 
@@ -86,4 +86,4 @@ const jobStatus = (job: JobKind) => {
   return "Unknown";
 };
 
-export default ApplicationJobsHealthCard;
+export default ApplicationJobHealthCard;
