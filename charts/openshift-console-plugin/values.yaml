@@ -4,7 +4,7 @@ plugin:
   description: ""
   image: "quay.io/ikanello/quarkus-openshift-console-plugin:latest"
   imagePullPolicy: Always
-  replicas: 2
+  replicas: 1
   port: 9443
   securityContext:
     enabled: true
