@@ -39,7 +39,7 @@ const ApplicationLogViewer: React.FC<{ application: Application, containerName?:
     setTimer(
       window.setInterval(() => {
         setItemCount(itemCount => itemCount + 1);
-      }, 500)
+      }, 10)
     );
     return () => {
       window.clearInterval(timer);
