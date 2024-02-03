@@ -237,21 +237,18 @@ export async function fetchApplicationsWithMetrics(ns: string): Promise<Applicat
 
 export async function fetchApplicationPods(ns: string, applicationName: string): Promise<PodKind[]>  {
   return consoleFetchJSON('/api/kubernetes/api/v1/namespaces/' + ns + '/pods?labelSelector=app.kubernetes.io/name%3D' + applicationName).then(res => {
-     console.log('fetchPods:' + JSON.stringify(res));
      return res.items;
   }).catch(_ => {
     return null;
   });
 }
 
-export async function fetchPodsLogs(ns: string, podName: string, containerName?: string): Promise<String>  {
+export async function fetchPodsLogs(ns: string, podName: string, containerName?: string): Promise<string>  {
   let logUri = '/api/kubernetes/api/v1/namespaces/' + ns + '/pods/' + podName + '/log';
   if (containerName) {
     logUri += '?container=' + containerName;
   }
-  console.log('fetchPodsLogs URI:' + logUri);
   return consoleFetchJSON(logUri).then(res => {
-     console.log('fetchPodsLogs Result:' + JSON.stringify(res));
      return res;
   }).catch(_ => {
     return null;
