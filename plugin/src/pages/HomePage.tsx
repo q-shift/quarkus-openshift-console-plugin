@@ -22,7 +22,7 @@ export const QuarkusPage: React.FC<QuarkusHomePageProps> = ({ match }) => {
   const { t } = useTranslation('plugin__console-plugin-template');
   const { ns } = match?.params || {};
 
-  const [activeNamespace, setActiveNamespace] = useState(ns || 'all-namespaces');
+  const [activeNamespace, setActiveNamespace] = useState(ns || null);
   const [applications, setApplications] = useState<Application[]>([]);
 
   useEffect(() => {

@@ -4,10 +4,13 @@ import { Application, deploymentConfigToApplication, deploymentToApplication } f
 import { sprintf } from 'sprintf-js';
 import { quarkusApplicationStore } from '../state';
 
+const OPENSHIFT_RUNTIME = 'app.openshift.io/runtime';
+
 async function fetchDeployments(ns: string): Promise<Application[]>  {
-  return consoleFetchJSON('/api/kubernetes/apis/apps/v1/namespaces/' + ns + '/deployments').then(res => {
+  let deploymentsUri = ns ? '/api/kubernetes/apis/apps/v1/namespaces/' + ns + '/deployments' : '/api/kubernetes/apis/apps/v1/deployments';
+  return consoleFetchJSON(deploymentsUri).then(res => {
     return res.items
-      .filter((d: DeploymentKind) => (d.metadata.labels['app.openshift.io/runtime'] === 'quarkus'))
+      .filter((d: DeploymentKind) => (d.metadata.labels && d.metadata.labels[OPENSHIFT_RUNTIME] && d.metadata.labels[OPENSHIFT_RUNTIME] === 'quarkus'))
       .map((d: DeploymentKind) => deploymentToApplication(d));
   });
 }
@@ -24,9 +27,10 @@ async function fetchDeployment(ns: string, name: string): Promise<Application>  
 }
 
 async function fetchDeploymentConfigs(ns: string): Promise<Application[]> {
-  return consoleFetchJSON('/api/kubernetes/apis/apps.openshift.io/v1/namespaces/' + ns + '/deploymentconfigs').then(res => {
+  let deploymentConfigUri = ns ? '/api/kubernetes/apis/apps.openshift.io/v1/namespaces/' + ns + '/deploymentconfigs' : '/api/kubernetes/apis/apps.openshift.io/v1/deploymentconfigs';
+  return consoleFetchJSON(deploymentConfigUri).then(res => {
     return res.items
-      .filter((d: DeploymentConfigKind) => (d.metadata.labels['app.openshift.io/runtime'] === 'quarkus'))
+      .filter((d: DeploymentConfigKind) => (d.metadata.labels && d.metadata.labels[OPENSHIFT_RUNTIME] && d.metadata.labels[OPENSHIFT_RUNTIME] === 'quarkus'))
       .map((d: DeploymentConfigKind) => deploymentConfigToApplication(d));
   }).catch(_ => {
       return null;
