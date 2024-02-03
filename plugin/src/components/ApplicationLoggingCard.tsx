@@ -27,9 +27,8 @@ import { TimesIcon } from '@patternfly/react-icons/dist/esm/icons/times-icon';
 import { Table, Tbody, Td, Thead, Tr, Th } from '@patternfly/react-table';
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-
-
 import { Application } from '../types';
+import ApplicationLogViewer from './ApplicationLogViewer';
 
 const ApplicationLoggingCard: React.FC<{application: Application }> = ({ application }) => {
 
@@ -122,8 +121,16 @@ const ApplicationLoggingCard: React.FC<{application: Application }> = ({ applica
       <CardTitle>Logging</CardTitle>
       <CardBody>
         <Tabs activeKey={activeTabKey} onSelect={handleTabClick}>
-          <Tab eventKey={0} title={<TabTitleText>Loggers</TabTitleText>}>
-            <TabContent id="0" title="Loggers">
+          <Tab eventKey={0} title={<TabTitleText>Logs</TabTitleText>}>
+            <TabContent id="0" title="Logs">
+              <PageSection variant="light">
+                {application && application.metadata &&
+                <ApplicationLogViewer application={application} containerName={application.metadata.name} /> }
+              </PageSection>
+            </TabContent>
+          </Tab>
+          <Tab eventKey={1} title={<TabTitleText>Loggers</TabTitleText>}>
+            <TabContent id="1" title="Loggers">
               <Toolbar id="toolbar-with-chip-groups" clearAllFilters={onDelete} collapseListedFiltersBreakpoint="xl">
                 <ToolbarContent>
                   <ToolbarToggleGroup toggleIcon={<FilterIcon />} breakpoint="xl">
@@ -164,12 +171,6 @@ const ApplicationLoggingCard: React.FC<{application: Application }> = ({ applica
                 </Tbody>
               </Table>
 
-            </TabContent>
-          </Tab>
-          <Tab eventKey={1} title={<TabTitleText>Logs</TabTitleText>}>
-            <TabContent id="1" title="Logs">
-              <PageSection variant="light">
-              </PageSection>
             </TabContent>
           </Tab>
         </Tabs>
