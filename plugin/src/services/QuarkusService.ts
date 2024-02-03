@@ -44,7 +44,6 @@ async function fetchDeploymentConfig(ns: string, name: string): Promise<Applicat
 
 export async function fetchSecret(ns: string, name: string): Promise<SecretKind>  {
   return consoleFetchJSON('/api/kubernetes/api/v1/namespaces/' + ns + '/secrets/' + name).then(res => {
-     console.log(JSON.stringify(res));
      return res.data;
   }).catch(_ => {
     return null;
@@ -53,7 +52,6 @@ export async function fetchSecret(ns: string, name: string): Promise<SecretKind>
 
 export async function fetchConfigMap(ns: string, name: string): Promise<ConfigMapKind>  {
   return consoleFetchJSON('/api/kubernetes/api/v1/namespaces/' + ns + '/configmaps/' + name).then(res => {
-     console.log(JSON.stringify(res));
      return res.data;
   }).catch(_ => {
     return null;
@@ -62,7 +60,6 @@ export async function fetchConfigMap(ns: string, name: string): Promise<ConfigMa
 
 export async function fetchPvc(ns: string, name: string): Promise<PersistentVolumeClaimKind>  {
   return consoleFetchJSON('/api/kubernetes/api/v1/namespaces/' + ns + '/persistentvolumeclaims/' + name).then(res => {
-     console.log(JSON.stringify(res));
      return res.data;
   }).catch(_ => {
     return null;
@@ -71,7 +68,6 @@ export async function fetchPvc(ns: string, name: string): Promise<PersistentVolu
 
 export async function fetchJobs(ns: string): Promise<JobKind[]>  {
   return consoleFetchJSON('/api/kubernetes/apis/batch/v1/namespaces/' + ns + '/jobs/').then(res => {
-     console.log(JSON.stringify(res));
      return res.items;
   }).catch(_ => {
     return null;
@@ -80,7 +76,6 @@ export async function fetchJobs(ns: string): Promise<JobKind[]>  {
 
 export async function fetchJob(ns: string, name: string): Promise<JobKind>  {
   return consoleFetchJSON('/api/kubernetes/apis/batch/v1/namespaces/' + ns + '/jobs/' + name).then(res => {
-     console.log(JSON.stringify(res));
      return res.data;
   }).catch(_ => {
     return null;
@@ -117,7 +112,6 @@ async function populateCpuMetrics(app: Application): Promise<Application> {
         y: sprintf('%.2f', value[1])
       }));
     }
-    console.log('Cpu Metrics:'+ JSON.stringify(newApp.metrics.cpu));
     return newApp;
   }).catch(error => {
     console.error('Error fetching CPU metrics:', error);
@@ -153,7 +147,6 @@ async function populateMemMetrics(app: Application): Promise<Application> {
       }));
     }
 
-    console.log('Memory metrics:' + JSON.stringify(newApp.metrics.memory));
     return newApp;
   }).catch(error => {
     console.error('Error fetching memory metrics:', error);
@@ -179,7 +172,6 @@ export async function populateGCPauseMetrics(app: Application): Promise<Applicat
       }));
     }
 
-    console.log('GC Pause metrics:' + JSON.stringify(newApp.metrics.memory));
     return newApp;
   }).catch(error => {
     console.error('Error fetching memory metrics:', error);
@@ -204,7 +196,6 @@ export async function populateGCOverheadMetrics(app: Application): Promise<Appli
       }));
     }
 
-    console.log('GC Overhead metrics:' + JSON.stringify(newApp.metrics.memory));
     return newApp;
   }).catch(error => {
     console.error('Error fetching memory metrics:', error);
@@ -245,13 +236,28 @@ export async function fetchApplicationsWithMetrics(ns: string): Promise<Applicat
 }
 
 export async function fetchApplicationPods(ns: string, applicationName: string): Promise<PodKind[]>  {
-  return consoleFetchJSON('/api/kubernetes/api/v1/namespaces/' + ns + '/pods/').then(res => {
-     console.log(JSON.stringify(res));
-     return res.items.filter((pod) => { pod.metadata.labels['app.kubernetes.io/name'] === applicationName; });
+  return consoleFetchJSON('/api/kubernetes/api/v1/namespaces/' + ns + '/pods?labelSelector=app.kubernetes.io/name%3D' + applicationName).then(res => {
+     console.log('fetchPods:' + JSON.stringify(res));
+     return res.items;
   }).catch(_ => {
     return null;
   });
 }
+
+export async function fetchPodsLogs(ns: string, podName: string, containerName?: string): Promise<String>  {
+  let logUri = '/api/kubernetes/api/v1/namespaces/' + ns + '/pods/' + podName + '/log';
+  if (containerName) {
+    logUri += '?container=' + containerName;
+  }
+  console.log('fetchPodsLogs URI:' + logUri);
+  return consoleFetchJSON(logUri).then(res => {
+     console.log('fetchPodsLogs Result:' + JSON.stringify(res));
+     return res;
+  }).catch(_ => {
+    return null;
+  });
+}
+
 
 export async function fetchApplication(kind: string, ns: string, name: string): Promise<Application> {
   let app: Promise<Application>;
@@ -287,6 +293,7 @@ const QuarkusService = {
   fetchApplications,
   fetchApplicationPods,
   fetchApplicationsWithMetrics,
+  fetchPodsLogs,
   populateCpuMetrics,
   populateMemMetrics,
   populateGCOverheadMetrics,

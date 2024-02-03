@@ -1,13 +1,13 @@
 import * as React from 'react';
 import { LogViewer, LogViewerSearch } from '@patternfly/react-log-viewer';
 import {
-	Button,
-	Tooltip,
-	Toolbar,
-	ToolbarContent,
-	ToolbarGroup,
-	ToolbarItem,
-	ToolbarToggleGroup
+  Button,
+  Tooltip,
+  Toolbar,
+  ToolbarContent,
+  ToolbarGroup,
+  ToolbarItem,
+  ToolbarToggleGroup
 } from '@patternfly/react-core';
 import OutlinedPlayCircleIcon from '@patternfly/react-icons/dist/esm/icons/outlined-play-circle-icon';
 import ExpandIcon from '@patternfly/react-icons/dist/esm/icons/expand-icon';
@@ -16,35 +16,57 @@ import PlayIcon from '@patternfly/react-icons/dist/esm/icons/play-icon';
 import EllipsisVIcon from '@patternfly/react-icons/dist/esm/icons/ellipsis-v-icon';
 import DownloadIcon from '@patternfly/react-icons/dist/esm/icons/download-icon';
 import { Application } from '../types';
+import { PodKind } from '../k8s-types';
+import { fetchApplicationPods, fetchPodsLogs } from '../services/QuarkusService';
 
 const ApplicationLogViewer: React.FC<{ application: Application, containerName?: string }> = ({ application, containerName }) => {
+
+  const [pods, setPods] = React.useState<PodKind[]>([]);
+
   const [content, setContent] = React.useState([]);
   const [isPaused, setIsPaused] = React.useState(false);
   const [isFullScreen] = React.useState(false);
   const [itemCount, setItemCount] = React.useState(1);
   const [currentItemCount, setCurrentItemCount] = React.useState(0);
-  const [renderData, setRenderData] = React.useState('');
+  const [_, setRenderData] = React.useState('');
   const [timer, setTimer] = React.useState(null);
   const [buffer, setBuffer] = React.useState([]);
   const [linesBehind, setLinesBehind] = React.useState(0);
   const logViewerRef = React.useRef();
 
   React.useEffect(() => {
-    setContent([
-      'This is a test log entry.',
-      'This is another one.',
-      'And another one',
-      'an yet another one'
-      ]);
-    setTimer(
-      window.setInterval(() => {
-        setItemCount(itemCount => itemCount + 1);
-      }, 10)
-    );
-    return () => {
-      window.clearInterval(timer);
-    };
-  }, []);
+    if (application && application.metadata) {
+      fetchApplicationPods(application.metadata.namespace, application.metadata.name).then((newPods: PodKind[]) => {
+        if (newPods) {
+          console.log('(logs): Application pods:' +  newPods.map(p => p.metadata.name).join(', '));
+          setPods(newPods);
+        }
+      });
+    }
+  }, [application]);
+
+  React.useEffect(() => {
+    console.log('Getting logs of pod...');
+    if (pods && pods.length > 0) {
+      console.log('Getting logs of pod:' + pods[0].metadata.name);
+      fetchPodsLogs(application.metadata.namespace, pods[0].metadata.name, containerName).then(logs => {
+        if (logs) {
+          console.log('setting logs:' + logs);
+          setContent(logs.split('\n'));
+          setTimer(
+            window.setInterval(() => {
+              setItemCount(itemCount => itemCount + 1);
+            }, 10)
+          );
+          return () => {
+            window.clearInterval(timer);
+          };
+
+        }
+      });
+    }
+  }, [pods]);
+
 
   React.useEffect(() => {
     if (itemCount > content.length) {
@@ -59,8 +81,8 @@ const ApplicationLogViewer: React.FC<{ application: Application, containerName?:
       setCurrentItemCount(buffer.length);
       setRenderData(buffer.join('\n'));
       if (logViewerRef && logViewerRef.current) {
-       //TODO: Fix the commented line below 
-       // logViewerRef.current.scrollToBottom();
+        //TODO: Fix the commented line below 
+        // logViewerRef.current.scrollToBottom();
       }
     } else if (buffer.length !== currentItemCount) {
       setLinesBehind(buffer.length - currentItemCount);
@@ -93,17 +115,17 @@ const ApplicationLogViewer: React.FC<{ application: Application, containerName?:
   };
 
   const ControlButton = () => (
-      <Button
-        variant={isPaused ? 'plain' : 'link'}
-        onClick={() => {
-          setIsPaused(!isPaused);
-        }}
-      >
-        {isPaused ? <PlayIcon /> : <PauseIcon />}
-        {isPaused ? ` Resume Log` : ` Pause Log`}
-      </Button>
-    );
-    
+    <Button
+      variant={isPaused ? 'plain' : 'link'}
+      onClick={() => {
+        setIsPaused(!isPaused);
+      }}
+    >
+      {isPaused ? <PlayIcon /> : <PauseIcon />}
+      {isPaused ? ` Resume Log` : ` Pause Log`}
+    </Button>
+  );
+
   const leftAlignedToolbarGroup = (
     <React.Fragment>
       <ToolbarToggleGroup toggleIcon={<EllipsisVIcon />} breakpoint="md">
@@ -151,23 +173,24 @@ const ApplicationLogViewer: React.FC<{ application: Application, containerName?:
   };
   return (
     <LogViewer
-      data={renderData}
       id="application-log-viewer"
+      data={content}
+      theme="dark"
       scrollToRow={currentItemCount}
       innerRef={logViewerRef}
       height={isFullScreen ? '100%' : 600}
       toolbar={
-        <Toolbar>
-          <ToolbarContent>
-            <ToolbarGroup>{leftAlignedToolbarGroup}</ToolbarGroup>
-            <ToolbarGroup>{rightAlignedToolbarGroup}</ToolbarGroup>
-          </ToolbarContent>
-        </Toolbar>
-      }
+      <Toolbar>
+        <ToolbarContent>
+          <ToolbarGroup>{leftAlignedToolbarGroup}</ToolbarGroup>
+          <ToolbarGroup>{rightAlignedToolbarGroup}</ToolbarGroup>
+        </ToolbarContent>
+      </Toolbar>
+    }
       overScanCount={10}
       footer={isPaused && <FooterButton />}
       onScroll={onScroll}
-    />
+      />
   );
 };
 
