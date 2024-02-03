@@ -9,7 +9,6 @@ import {
   ToolbarItem,
   ToolbarToggleGroup
 } from '@patternfly/react-core';
-import OutlinedPlayCircleIcon from '@patternfly/react-icons/dist/esm/icons/outlined-play-circle-icon';
 import ExpandIcon from '@patternfly/react-icons/dist/esm/icons/expand-icon';
 import PauseIcon from '@patternfly/react-icons/dist/esm/icons/pause-icon';
 import PlayIcon from '@patternfly/react-icons/dist/esm/icons/play-icon';
@@ -31,7 +30,6 @@ const ApplicationLogViewer: React.FC<{ application: Application, containerName?:
   const [_, setRenderData] = React.useState('');
   const [timer, setTimer] = React.useState(null);
   const [buffer, setBuffer] = React.useState([]);
-  const [linesBehind, setLinesBehind] = React.useState(0);
   const logViewerRef = React.useRef();
 
   React.useEffect(() => {
@@ -74,7 +72,7 @@ const ApplicationLogViewer: React.FC<{ application: Application, containerName?:
     } else {
       setBuffer(content.slice(0, itemCount));
     }
-  }, [itemCount]);
+  }, [content, itemCount]);
 
   React.useEffect(() => {
     if (!isPaused && buffer.length > 0) {
@@ -84,10 +82,6 @@ const ApplicationLogViewer: React.FC<{ application: Application, containerName?:
         //TODO: Fix the commented line below 
         // logViewerRef.current.scrollToBottom();
       }
-    } else if (buffer.length !== currentItemCount) {
-      setLinesBehind(buffer.length - currentItemCount);
-    } else {
-      setLinesBehind(0);
     }
   }, [isPaused, buffer]);
 
@@ -102,16 +96,6 @@ const ApplicationLogViewer: React.FC<{ application: Application, containerName?:
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
-  };
-
-  const onScroll = ({ scrollOffsetToBottom, _scrollDirection, scrollUpdateWasRequested }) => {
-    if (!scrollUpdateWasRequested) {
-      if (scrollOffsetToBottom > 0) {
-        setIsPaused(true);
-      } else {
-        setIsPaused(false);
-      }
-    }
   };
 
   const ControlButton = () => (
@@ -160,17 +144,6 @@ const ApplicationLogViewer: React.FC<{ application: Application, containerName?:
     </React.Fragment>
   );
 
-  const FooterButton = () => {
-    const handleClick = _e => {
-      setIsPaused(false);
-    };
-    return (
-      <Button onClick={handleClick} isBlock>
-        <OutlinedPlayCircleIcon />
-        resume {linesBehind === 0 ? null : `and show ${linesBehind} lines`}
-      </Button>
-    );
-  };
   return (
     <LogViewer
       id="application-log-viewer"
@@ -179,6 +152,8 @@ const ApplicationLogViewer: React.FC<{ application: Application, containerName?:
       scrollToRow={currentItemCount}
       innerRef={logViewerRef}
       height={isFullScreen ? '100%' : 600}
+      isTextWrapped={false}
+      hasLineNumbers={true}
       toolbar={
       <Toolbar>
         <ToolbarContent>
@@ -186,11 +161,7 @@ const ApplicationLogViewer: React.FC<{ application: Application, containerName?:
           <ToolbarGroup>{rightAlignedToolbarGroup}</ToolbarGroup>
         </ToolbarContent>
       </Toolbar>
-    }
-      overScanCount={10}
-      footer={isPaused && <FooterButton />}
-      onScroll={onScroll}
-      />
+    }/>
   );
 };
 
