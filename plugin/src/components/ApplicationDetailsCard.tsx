@@ -4,6 +4,7 @@ import {
   Card,
   CardBody,
   CardTitle,
+  Spinner,
   TextContent,
 } from '@patternfly/react-core';
 
@@ -182,9 +183,8 @@ const ApplicationDetailsCard: React.FC<{ application: Application }> = ({ applic
     <Card>
       <CardTitle>Application</CardTitle>
       <CardBody>
-        {application && (
+        {application ? (
           <div>
-
             <Card>
               <CardTitle>Details</CardTitle>
               <CardBody>
@@ -236,7 +236,7 @@ const ApplicationDetailsCard: React.FC<{ application: Application }> = ({ applic
               </CardBody>
             </Card>
           </div>
-        )}
+        ): <Spinner aria-label="Loading applicaton details" />}
       </CardBody>
     </Card>
   );
