@@ -9,7 +9,8 @@ import {
   ToolbarItem,
   ToolbarToggleGroup,
   Select,
-  SelectOption
+  SelectOption,
+  Spinner
 } from '@patternfly/react-core';
 import ExpandIcon from '@patternfly/react-icons/dist/esm/icons/expand-icon';
 import PauseIcon from '@patternfly/react-icons/dist/esm/icons/pause-icon';
@@ -30,10 +31,10 @@ const ApplicationLogViewer: React.FC<{ application: Application, containerName?:
   const [isFullScreen] = React.useState(false);
   const [itemCount, setItemCount] = React.useState(1);
   const [currentItemCount, setCurrentItemCount] = React.useState(0);
-  const [_, setRenderData] = React.useState('');
+  const [renderData, setRenderData] = React.useState('');
   const [timer, setTimer] = React.useState(null);
   const [buffer, setBuffer] = React.useState([]);
-  const logViewerRef = React.useRef();
+  const logViewerRef = React.useRef<any>();
 
   const [isPodDropdownOpen, setIsPodDropdownOpen] = React.useState(false);
 
@@ -53,19 +54,22 @@ const ApplicationLogViewer: React.FC<{ application: Application, containerName?:
       fetchPodsLogs(application.metadata.namespace, pods[0].metadata.name, containerName).then(logs => {
         if (logs) {
           setContent(logs.split('\n'));
-          setTimer(
-            window.setInterval(() => {
-              setItemCount(itemCount => itemCount + 1);
-            }, 10)
-          );
-          return () => {
-            window.clearInterval(timer);
-          };
-
         }
       });
     }
   }, [pods]);
+
+
+  React.useEffect(() => {
+    setTimer(
+      window.setInterval(() => {
+        setItemCount(itemCount => itemCount + 1);
+      }, 10)
+    );
+    return () => {
+      window.clearInterval(timer);
+    };
+  }, [content]);
 
 
   React.useEffect(() => {
@@ -82,14 +86,14 @@ const ApplicationLogViewer: React.FC<{ application: Application, containerName?:
       setRenderData(buffer.join('\n'));
       if (logViewerRef && logViewerRef.current) {
         //TODO: Fix the commented line below 
-        // logViewerRef.current.scrollToBottom();
+        logViewerRef.current.scrollToBottom();
       }
     }
   }, [isPaused, buffer]);
 
 
   const onPodSelect = (event) => {
-   setIsPodDropdownOpen(false); 
+    setIsPodDropdownOpen(false); 
   };
 
   const onPodToggle = (event) => {
@@ -123,14 +127,14 @@ const ApplicationLogViewer: React.FC<{ application: Application, containerName?:
   );
 
   const PodSelectionDropdown = () => (
-        <ToolbarItem>
-          <Select
-            onSelect={onPodSelect}
-            onToggle={onPodToggle}
-            isOpen={isPodDropdownOpen}>
-            {podNames && podNames.map(name => <SelectOption key={name} value={name}>{name}</SelectOption>)}
-          </Select>
-        </ToolbarItem>
+    <ToolbarItem>
+      <Select
+        onSelect={onPodSelect}
+        onToggle={onPodToggle}
+        isOpen={isPodDropdownOpen}>
+        {podNames && podNames.map(name => <SelectOption key={name} value={name}>{name}</SelectOption>)}
+      </Select>
+    </ToolbarItem>
   )
 
   const leftAlignedToolbarGroup = (
@@ -169,9 +173,10 @@ const ApplicationLogViewer: React.FC<{ application: Application, containerName?:
   );
 
   return (
-    <LogViewer
-      id="application-log-viewer"
-      data={content}
+    <>
+    {renderData 
+        ? <LogViewer id="application-log-viewer"
+      data={renderData}
       theme="dark"
       scrollToRow={currentItemCount}
       innerRef={logViewerRef}
@@ -186,6 +191,9 @@ const ApplicationLogViewer: React.FC<{ application: Application, containerName?:
         </ToolbarContent>
       </Toolbar>
     }/>
+      : <Spinner aria-label='Loading logs'/>
+    }
+    </>
   );
 };
 
