@@ -5,16 +5,17 @@ import {
   CardBody,
   CardTitle,
   TextContent,
-  Text
 } from '@patternfly/react-core';
 
 import { Application } from '../types';
 import Status from '@openshift-console/dynamic-plugin-sdk/lib/app/components/status/Status';
-import { consoleFetchJSON } from '@openshift-console/dynamic-plugin-sdk';
+import { consoleFetchJSON, ResourceLink } from '@openshift-console/dynamic-plugin-sdk';
 
 const ApplicationDetailsCard: React.FC<{ application: Application }> = ({ application }) => {
 
   const [name, setName] = useState<string>();
+  const [namespace, setNamespace] = useState<string>();
+  const [kind, setKind] = useState<string>();
   const [version, setVersion] = useState<string>();
   const [buildTimestamp, setBuildTimestamp] = useState<string>();
   const [vcsUri, setVcsUri] = useState<string>();
@@ -28,7 +29,9 @@ const ApplicationDetailsCard: React.FC<{ application: Application }> = ({ applic
   const [produiEndpoint, setProduiEndpoint] = useState<string>();
   const [produiEndpointStatus, setProduiEndpointStatus] = useState<string>('Pending');
   const [framework, setFramework] = useState<string>();
+  const [frameworkUrl, setFrameworkUrl] = useState<string>();
   const [frameworkVersion, setFrameworkVersion] = useState<Version>();
+  const [releaseNotesUrl, setReleaseNotesUrl] = useState<string>();
   //const [buildVersion, setBuildVersion] = useState<string | null>(null);
 
   type Version = {
@@ -135,7 +138,9 @@ const ApplicationDetailsCard: React.FC<{ application: Application }> = ({ applic
   useEffect(() => {
     const quarkusVersion = getQuarkusVersion(application);
     if (application) {
+      setKind(application.kind);
       setName(application.metadata.name);
+      setNamespace(application.metadata.namespace);
       setVersion(getApplicationVersion(application));
       setBuildTimestamp(getBuildTimestamp(application));
       setVcsUri(getVcsUri(application));
@@ -153,6 +158,26 @@ const ApplicationDetailsCard: React.FC<{ application: Application }> = ({ applic
     }
   }, [application]);
 
+  useEffect(() => {
+   switch (framework) {
+      case "quarkus":
+        setFrameworkUrl("https://quarkus.io/");
+      break;
+      default:
+       setFrameworkUrl("");
+      break;
+   } 
+  }, [framework])
+
+  useEffect(() => {
+    if (frameworkVersion && frameworkVersion.version) {
+      const releaseUrl = `https://github.com/quarkusio/quarkus/releases/tag/${frameworkVersion.version}`; 
+      if (!frameworkVersion.version.endsWith('-SNAPSHOT')) {
+        setReleaseNotesUrl(releaseUrl); 
+      }
+    }
+  }, [frameworkVersion]);
+
   return (
     <Card>
       <CardTitle>Application</CardTitle>
@@ -163,17 +188,22 @@ const ApplicationDetailsCard: React.FC<{ application: Application }> = ({ applic
             <Card>
               <CardTitle>Details</CardTitle>
               <CardBody>
-            <Text component="h3" >{name}</Text>
-            {version && <TextContent><strong>Version:</strong> {version}</TextContent>}
-            {buildTimestamp && <TextContent><strong>Build Timestamp:</strong> {buildTimestamp}</TextContent>}
-            {vcsUri && <TextContent><strong>Version Control:</strong> {vcsUri}</TextContent>}
-            <TextContent>
-              <strong>Location:</strong>
-              <a href={location} target="_blank" rel="noopener noreferrer">
-                {location}
-              </a>
-            </TextContent>
-            </CardBody>
+                <ResourceLink
+                  key={name}
+                  kind={kind}
+                  name={name}
+                  namespace={namespace}
+                  linkTo={true}/>
+                {version && <TextContent><strong>Version:</strong> {version}</TextContent>}
+                {buildTimestamp && <TextContent><strong>Build Timestamp:</strong> {buildTimestamp}</TextContent>}
+                {vcsUri && <TextContent><strong>Version Control:</strong> {vcsUri}</TextContent>}
+                <TextContent>
+                  <strong>Location:</strong>
+                  <a href={location} target="_blank" rel="noopener noreferrer">
+                    {location}
+                  </a>
+                </TextContent>
+              </CardBody>
             </Card>
 
             <Card>
@@ -189,13 +219,18 @@ const ApplicationDetailsCard: React.FC<{ application: Application }> = ({ applic
             <Card>
               <CardTitle>Framework</CardTitle>
               <CardBody>
-                <TextContent><strong>Framework:</strong> {framework}</TextContent>
+                <TextContent><strong>Framework: </strong> {frameworkUrl 
+                  ? <a href={frameworkUrl} target="_blank" rel="noopener noreferrer">{framework}</a>
+                  : framework}
+                </TextContent>
                 {frameworkVersion &&
                   <>
-                    <TextContent><strong>Version:</strong> {frameworkVersion.version}</TextContent>
-                    <TextContent><strong>Major Version:</strong> {frameworkVersion.major}</TextContent>
-                    <TextContent><strong>Minor Version:</strong> {frameworkVersion.minor}</TextContent>
-                    <TextContent><strong>Patch Version:</strong> {frameworkVersion.patch}</TextContent>
+                    <TextContent><strong>Version: </strong> {releaseNotesUrl 
+                      ? <a href={releaseNotesUrl} target="_blank" rel="noopener noreferrer">{frameworkVersion.version}</a>
+                      : frameworkVersion.version}</TextContent>
+                    <TextContent><strong>Major Version: </strong> {frameworkVersion.major}</TextContent>
+                    <TextContent><strong>Minor Version: </strong> {frameworkVersion.minor}</TextContent>
+                    <TextContent><strong>Patch Version: </strong> {frameworkVersion.patch}</TextContent>
                     </>
               }
               </CardBody>

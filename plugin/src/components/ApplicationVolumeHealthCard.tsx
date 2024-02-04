@@ -13,6 +13,7 @@ import { Application } from '../types';
 import Status from '@openshift-console/dynamic-plugin-sdk/lib/app/components/status/Status';
 import { fetchConfigMap, fetchPvc, fetchSecret } from '../services/QuarkusService';
 import { ConfigMapKind, PersistentVolumeClaimKind, SecretKind } from 'k8s-types';
+import { ResourceLink } from '@openshift-console/dynamic-plugin-sdk';
 
 const ApplicationHealthCard: React.FC<{ application: Application }> = ({ application }) => {
 
@@ -61,7 +62,12 @@ const ApplicationHealthCard: React.FC<{ application: Application }> = ({ applica
         <List isPlain isBordered>
           {application && application.spec && application.spec.volumes && application.spec.volumes.map((volume, index) => (
             <ListItem key={index}>  
-              <Text component="h3" >{volume.name}</Text>
+              <ResourceLink
+                    key={volume.name}
+                    kind={volumeKind(volume)}
+                    name={volume.name}
+                    namespace={application.metadata.namespace}
+                    linkTo={true}/>
               <TextContent>
                 <Text component="p">Kind: {volumeKind(volume)} </Text>
               </TextContent>

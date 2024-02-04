@@ -6,6 +6,7 @@ import { Application } from "../types";
 import Status from "@openshift-console/dynamic-plugin-sdk/lib/app/components/status/Status";
 import { Button, Dropdown, DropdownItem, DropdownToggle, Select, SelectOption, TextInputGroup, TextInputGroupMain, TextInputGroupUtilities, Toolbar, ToolbarContent, ToolbarGroup, ToolbarItem, ToolbarToggleGroup } from "@patternfly/react-core";
 import { EllipsisVIcon, FilterIcon, SearchIcon, TimesIcon } from "@patternfly/react-icons";
+import { deleteApplication, deleteApplicationPods } from "../services/QuarkusService";
 interface ApplicationListProps {
   apps: Application[];
 }
@@ -13,6 +14,7 @@ interface ApplicationListProps {
 export const ApplicationList: React.FC<ApplicationListProps> = ({ apps }) => {
   const columnNames = {
     name: 'Name',
+    kind: 'Kind',
     namespace: 'Namespace',
     status: 'Status',
     created: 'Created',
@@ -20,7 +22,6 @@ export const ApplicationList: React.FC<ApplicationListProps> = ({ apps }) => {
     memory: 'Memory',
   };
 
-  //const devUiUrl = (app) => `/api/proxy/plugin/quarkus-openshift-console-plugin/service-proxy/produi/${app.metadata.namespace}/${app.metadata.name}/`
   const applicationUrl = (app) => `/quarkus/application/${app.metadata.namespace}/${app.kind}/${app.metadata.name}`
 
   const [sortColumn, setSortColumn] = useState("name"); // Default sorting column
@@ -119,20 +120,23 @@ export const ApplicationList: React.FC<ApplicationListProps> = ({ apps }) => {
     setOpenStates(updatedOpenStates);
   };
 
-  /*
-  const openActions = (index: number) => {
-    const updatedOpenStates = [...openStates];
-    updatedOpenStates[index] = true;
-    setOpenStates(updatedOpenStates);
-  };
-  */
-
 
   const onSelectAction = (action: string, index: number) => {
     const updatedSelectedActions = [...selectedActions];
     updatedSelectedActions[index] = action;
     setSelectedActions(updatedSelectedActions);
     setOpenStates(Array(apps.length).fill(false)); // Close all other rows
+    const app = apps[index];
+    switch (action) {
+      case "Undeploy":
+        console.log("Undeploying: " + app.metadata.name);
+        deleteApplication(app.kind, app.metadata.namespace, app.metadata.name);
+        break;
+      case "Restart":
+        console.log("Restarting: " + app.metadata.name);
+        deleteApplicationPods(app.metadata.namespace, app.metadata.name);
+        break;
+    }
   };
 
 
@@ -146,6 +150,10 @@ export const ApplicationList: React.FC<ApplicationListProps> = ({ apps }) => {
       return sortDirection === "asc"
         ? a.metadata.name.localeCompare(b.metadata.name)
         : b.metadata.name.localeCompare(a.metadata.name);
+    } else if (sortColumn === "kind") {
+      return sortDirection === "asc"
+        ? a.kind.localeCompare(b.kind)
+        : b.kind.localeCompare(a.kind);
     } else if (sortColumn === "namespace") {
       return sortDirection === "asc"
         ? a.metadata.namespace.localeCompare(b.metadata.namespace)
@@ -196,6 +204,17 @@ export const ApplicationList: React.FC<ApplicationListProps> = ({ apps }) => {
 
               <span className="pf-c-table__sort-indicator"/>
               {sortColumn === "name" && (
+                <span className="sort-icon">{sortDirection === "asc" ? "▲" : "▼"}</span>
+              )}
+            </Th>
+            <Th
+              onClick={() => toggleSort("kind")}
+              className={sortColumn === "kind" ? `sorted ${sortDirection}` : ""}
+            >
+              {columnNames.kind}
+
+              <span className="pf-c-table__sort-indicator"/>
+              {sortColumn === "kind" && (
                 <span className="sort-icon">{sortDirection === "asc" ? "▲" : "▼"}</span>
               )}
             </Th>
@@ -255,6 +274,7 @@ export const ApplicationList: React.FC<ApplicationListProps> = ({ apps }) => {
                   {app.metadata.name}
                 </Link>
               </Td>
+              <Td dataLabel={columnNames.kind}>{app.kind}</Td>
               <Td dataLabel={columnNames.namespace}>{app.metadata.namespace}</Td>
               <Td dataLabel={columnNames.status}><Status title={`${app.status.availableReplicas} of ${app.status.replicas} pods`} status={app.status.availableReplicas === app.status.replicas ? "Succeeded" : "Failed"}/></Td>
               <Td dataLabel={columnNames.cpu}>{app.cpu}</Td>
@@ -271,7 +291,7 @@ export const ApplicationList: React.FC<ApplicationListProps> = ({ apps }) => {
                       </DropdownToggle>
                     }
                     dropdownItems={actions.map((action) => (
-                      <DropdownItem key={action}>{action}</DropdownItem>
+                      <DropdownItem key={action} className="mock">{action}</DropdownItem>
                     ))}
                   />
                 </div>

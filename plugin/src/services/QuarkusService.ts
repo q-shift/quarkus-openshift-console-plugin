@@ -26,6 +26,14 @@ async function fetchDeployment(ns: string, name: string): Promise<Application>  
   });
 }
 
+async function deleteDeployment(ns: string, name: string): Promise<boolean>  {
+  return consoleFetchJSON.delete('/api/kubernetes/apis/apps/v1/namespaces/' + ns + '/deployments/' + name).then(res => {
+       return true;
+  }).catch(_ => {
+    return false;
+  });
+}
+
 async function fetchDeploymentConfigs(ns: string): Promise<Application[]> {
   let deploymentConfigUri = ns ? '/api/kubernetes/apis/apps.openshift.io/v1/namespaces/' + ns + '/deploymentconfigs' : '/api/kubernetes/apis/apps.openshift.io/v1/deploymentconfigs';
   return consoleFetchJSON(deploymentConfigUri).then(res => {
@@ -43,6 +51,14 @@ async function fetchDeploymentConfig(ns: string, name: string): Promise<Applicat
            return deploymentConfigToApplication(res);
        }
        return null;
+  });
+}
+
+async function deleteDeploymentConfig(ns: string, name: string): Promise<boolean>  {
+  return consoleFetchJSON('/api/kubernetes/apis/apps.openshift.io/v1/namespaces/' + ns + '/deploymentconfigs/'+ name).then(res => {
+       return true;
+  }).catch(_ => {
+    return false;
   });
 }
 
@@ -290,6 +306,25 @@ export async function fetchApplicationWithMetrics(kind: string, ns: string, name
   return app.then(populateRoute).then(populateCpuMetrics).then(populateMemMetrics);
 }
 
+export async function deleteApplication(kind: string, ns: string, name: string): Promise<boolean> {
+  switch (kind) {
+    case 'Deployment':
+      return deleteDeployment(ns, name);
+    case 'DeploymentConfig':
+      return deleteDeploymentConfig(ns, name);
+    default:
+      throw new Error('Invalid kind: ' + kind);
+  }
+}
+
+export async function deleteApplicationPods(ns: string, name: string) {
+  fetchApplicationPods(ns, name).then((pods: PodKind[]) => {
+    pods.forEach((pod) => {
+      consoleFetchJSON.delete('/api/kubernetes/api/v1/namespaces/' + ns + '/pods/' + pod.metadata.name);
+    });
+  })
+}
+
 const QuarkusService = {
   fetchApplications,
   fetchApplicationPods,
@@ -304,6 +339,10 @@ const QuarkusService = {
   fetchConfigMap,
   fetchPvc,
   fetchJob,
-  fetchJobs
+  fetchJobs,
+  deleteDeployment,
+  deleteDeploymentConfig,
+  deleteApplication,
+  deleteApplicationPods
 }
 export default QuarkusService;

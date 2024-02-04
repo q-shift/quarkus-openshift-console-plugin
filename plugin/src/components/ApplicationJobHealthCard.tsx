@@ -6,13 +6,13 @@ import {
   CardTitle,
   List,
   ListItem,
-  Text,
   TextContent,
 } from '@patternfly/react-core';
 import { Application } from '../types';
 import Status from '@openshift-console/dynamic-plugin-sdk/lib/app/components/status/Status';
 import { fetchJobs } from '../services/QuarkusService';
 import { JobKind } from 'k8s-types';
+import { ResourceLink } from '@openshift-console/dynamic-plugin-sdk';
 
 const ApplicationJobHealthCard: React.FC<{ application: Application }> = ({ application }) => {
 
@@ -42,7 +42,12 @@ const ApplicationJobHealthCard: React.FC<{ application: Application }> = ({ appl
         <List isPlain isBordered>
           {jobs &&  jobs.map((job, index) => (
             <ListItem key={index}>  
-              <Text component="h3" >{job.metadata.name}</Text>
+                  <ResourceLink
+                    key={job.metadata.name}
+                    kind="Job"
+                    name={job.metadata.name}
+                    namespace={application.metadata.namespace}
+                    linkTo={true}/>
               {job.spec.template.spec.containers.map((container) => (
                 <>
                   <TextContent><strong>Name:</strong> {container.name}</TextContent>

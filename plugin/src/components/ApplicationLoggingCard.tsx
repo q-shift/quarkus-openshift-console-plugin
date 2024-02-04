@@ -143,7 +143,7 @@ const ApplicationLoggingCard: React.FC<{application: Application }> = ({ applica
                   </ToolbarToggleGroup>
                 </ToolbarContent>
               </Toolbar>
-              <Table>
+              <Table className="mock">
                 <Thead>
                   <Tr>
                     <Th>Name</Th>
