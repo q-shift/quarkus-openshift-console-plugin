@@ -12,13 +12,13 @@ import {
 import { Application } from '../types';
 import Status from '@openshift-console/dynamic-plugin-sdk/lib/app/components/status/Status';
 import { fetchConfigMap, fetchPvc, fetchSecret } from '../services/QuarkusService';
-import { ConfigMapKind, PersistentVolumeClaimKind, SecretKind } from 'k8s-types';
+import { ConfigMapKind, PersistentVolumeClaimKind, SecretKind, Volume } from 'k8s-types';
 import { ResourceLink } from '@openshift-console/dynamic-plugin-sdk';
 
 const ApplicationHealthCard: React.FC<{ application: Application }> = ({ application }) => {
 
   const [volumes, setVolumes] = useState(application && application.spec ? application.spec.volumes : []);
-  const [volumeStatus, setVolumeStatus] = useState(application && application.spec && application.spec.volumes ? application.spec.volumes.map(v => "Pending") : []);
+  const [volumeStatus, setVolumeStatus] = useState({});
 
   useEffect(() => {
     setVolumes(application && application.spec && application.spec.volumes ? application.spec.volumes : []);
@@ -26,33 +26,41 @@ const ApplicationHealthCard: React.FC<{ application: Application }> = ({ applica
 
   useEffect(() => {
     if (application && application.metadata) {
-      volumes.forEach((volume, index) => {
+      volumes.forEach(volume => {
         const kind = volumeKind(volume);
-        console.log('Volume kind:' + volume);
-        if (kind === 'ConfigMap') {
-          fetchConfigMap(application.metadata.namespace, volume.name).then((configMap: ConfigMapKind) => {
-            console.log('Updating volume status for configMap: ' + volume.name + ': ' + configMap);
-            updateVolumeStatus(index, configMap ?  "Succeeded" : "Pending");
-          });
-        } else if (kind === 'Secret') {
-          fetchSecret(application.metadata.namespace, volume.name).then((secret: SecretKind) => {
-            updateVolumeStatus(index, secret ?  "Succeeded" : "Pending");
-          });
-        } else if (kind === 'PersistentVolumeClaim') {
-          fetchPvc(application.metadata.namespace, volume.name).then((pvc: PersistentVolumeClaimKind) => {
-            updateVolumeStatus(index, pvc ?  "Succeeded" : "Pending");
-          });
+        switch (kind) {
+          case 'ConfigMap':
+            fetchConfigMap(application.metadata.namespace, volume.name).then((configMap: ConfigMapKind) => {
+              updateVolumeStatus(volume.name, configMap ?  "Succeeded" : "Pending");
+            });
+            break;
+          case 'Secret':
+            fetchSecret(application.metadata.namespace, volume.name).then((secret: SecretKind) => {
+              updateVolumeStatus(volume.name, secret ?  "Succeeded" : "Pending");
+            });
+            break;
+          case 'PersistentVolumeClaim':
+            fetchPvc(application.metadata.namespace, volume.name).then((pvc: PersistentVolumeClaimKind) => {
+              updateVolumeStatus(volume.name, pvc ?  "Succeeded" : "Pending");
+            });
+            break;
+          default:
+          console.log('Unknown volume kind: ' + kind);
         }
       });
     }
   }, [volumes]);
 
-  const updateVolumeStatus = (index: number, status: string) => {
-    console.log('Updating volume at index: ' + index + ' status: ' + status);
-    const newStatus = [...volumeStatus];
-    newStatus[index] = status;
-    setVolumeStatus(newStatus);
+  const updateVolumeStatus = (name: string, status: string) => {
+    setVolumeStatus(prevStatus => ({
+      ...prevStatus,
+      [name]: status,
+    }));
   } 
+
+  useEffect(() => {
+    //just for refresh 
+  }, [volumeStatus]);
 
 
   return (
@@ -60,34 +68,36 @@ const ApplicationHealthCard: React.FC<{ application: Application }> = ({ applica
       <CardTitle>Volumes</CardTitle>
       <CardBody>
         <List isPlain isBordered>
-          {application && application.spec && application.spec.volumes && application.spec.volumes.map((volume, index) => (
-            <ListItem key={index}>  
+          {application && application.spec && application.spec.volumes && application.spec.volumes.map(volume => (
+            <ListItem key={volume.name}>  
               <ResourceLink
-                    key={volume.name}
-                    kind={volumeKind(volume)}
-                    name={volume.name}
-                    namespace={application.metadata.namespace}
-                    linkTo={true}/>
+                key={volume.name}
+                kind={volumeKind(volume)}
+                name={volume.name}
+                namespace={application.metadata.namespace}
+                linkTo={true}/>
               <TextContent>
                 <Text component="p">Kind: {volumeKind(volume)} </Text>
               </TextContent>
               <TextContent>
                 {application.spec.containers.filter((container) => container.volumeMounts.filter((volumeMount) => volumeMount.name === volume.name).length > 0).map((container) => (
-                  <TextContent>
-                    Container: {container.name}
-                    {container.volumeMounts.filter((volumeMount) => volumeMount.name === volume.name).map((volumeMount) => (
-                      <TextContent>
-                        Path: {volumeMount.mountPath}
-                      </TextContent>
-                    ))}
-                  </TextContent>
+                  <li key={container.name}>
+                    <TextContent>
+                      Container: {container.name}
+                      {container.volumeMounts.filter((volumeMount) => volumeMount.name === volume.name).map((volumeMount) => (
+                        <TextContent>
+                          Path: {volumeMount.mountPath}
+                        </TextContent>
+                      ))}
+                    </TextContent>
+                  </li>
                 ))}
               </TextContent>
               <TextContent>
-                  Status:
-                  <Status
-                    title={volumeStatus.length > index ? "Available" : "Pending"}
-                    status={volumeStatus.length > index ? volumeStatus[index] : "Pending"} />
+                Status:
+                <Status
+                  title={volumeStatus[volume.name] ? volumeStatus[volume.name] : "Pending"}
+                  status={volumeStatus[volume.name] ? volumeStatus[volume.name] : "Pending"} />
               </TextContent>
             </ListItem>
           ))}
@@ -97,7 +107,7 @@ const ApplicationHealthCard: React.FC<{ application: Application }> = ({ applica
   );
 };
 
-const volumeKind = (volume) => {
+const volumeKind = (volume: Volume) => {
   //check if volume has property configMap and return `ConfigMap` or `Secret` otherwise
   if (volume.configMap) {
     return 'ConfigMap';
