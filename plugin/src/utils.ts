@@ -80,8 +80,8 @@ export function extractMountedConfigMaps(application: Application): string[] {
   const mountedConfigMaps: string[] = [];
   if (application.spec.volumes) {
     application.spec.volumes.forEach((volume) => {
-      if (volume.configMap && volume.configMap.configMapName) {
-        mountedConfigMaps.push(volume.configMap.configMapName);
+      if (volume.configMap && volume.configMap.name) {
+        mountedConfigMaps.push(volume.configMap.name);
       }
     });
   }
