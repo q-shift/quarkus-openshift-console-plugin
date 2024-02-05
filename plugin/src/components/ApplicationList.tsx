@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { Table, Thead, Tr, Th, Td, Tbody } from '@patternfly/react-table';
 import { Application } from "../types";
 import Status from "@openshift-console/dynamic-plugin-sdk/lib/app/components/status/Status";
-import { Button, Dropdown, DropdownItem, DropdownToggle, Select, SelectOption, TextInputGroup, TextInputGroupMain, TextInputGroupUtilities, Toolbar, ToolbarContent, ToolbarGroup, ToolbarItem, ToolbarToggleGroup } from "@patternfly/react-core";
+import { Button, Dropdown, DropdownItem, DropdownToggle, Select, SelectOption, Spinner, TextInputGroup, TextInputGroupMain, TextInputGroupUtilities, Toolbar, ToolbarContent, ToolbarGroup, ToolbarItem, ToolbarToggleGroup } from "@patternfly/react-core";
 import { EllipsisVIcon, FilterIcon, SearchIcon, TimesIcon } from "@patternfly/react-icons";
 import { deleteApplication, deleteApplicationPods } from "../services/QuarkusService";
 interface ApplicationListProps {
@@ -24,8 +24,10 @@ export const ApplicationList: React.FC<ApplicationListProps> = ({ apps }) => {
 
   const applicationUrl = (app) => `/quarkus/application/${app.metadata.namespace}/${app.kind}/${app.metadata.name}`
 
+  const [sortedApplications, setSortedApplications] = useState([]);
   const [sortColumn, setSortColumn] = useState("name"); // Default sorting column
   const [sortDirection, setSortDirection] = useState("asc"); // Default sorting direction (ascending)
+  const [selectedCategory, setSelectedCategory] = useState("Name");
 
   const toggleSort = (columnName) => {
     if (sortColumn === columnName) {
@@ -42,43 +44,57 @@ export const ApplicationList: React.FC<ApplicationListProps> = ({ apps }) => {
   // Filtering
   //
   const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
-  const [inputValue, setInputValue] = useState('');
-  const showClearButton = !!inputValue;
+  const [categoryValue, setCategoryValue] = useState('');
+  const showClearButton = !!categoryValue;
   const showUtilities = showClearButton;
   const clearInput = () => {
-    setInputValue('');
+    setCategoryValue('');
   };
 
-  const handleInputChange = (value: string, event: React.FormEvent<HTMLInputElement>) => {
-    //get text from event and set it to inputValue
-    if (event && event.currentTarget && event.currentTarget.value) {
-      setInputValue(event.currentTarget.value);
-    } else {
-      setInputValue(value);
-    }
-  };
-  //
   const onDelete = () => {
-
   }
+
+  const handleCategoryValueChange = (event, value) => {
+    setCategoryValue(value);
+  };
 
   const onCategoryToggle = () => {
     setIsCategoryDropdownOpen(!isCategoryDropdownOpen);
   }
 
-  const onCategorySelect = () => {
+  const onCategorySelect = (event, selection) => {
+    setSelectedCategory(selection);
+    setIsCategoryDropdownOpen(false);
+  }
 
+  const filterWithSelection = (app: Application) => {
+    if (!(categoryValue && setSelectedCategory)) {
+      return true;
+    }
+
+    if (selectedCategory === "Name") {
+      return app.metadata.name.includes(categoryValue);
+    }
+    if (selectedCategory === "Namespace") {
+      return app.metadata.namespace.includes(categoryValue);
+    }
+    if (selectedCategory === "Kind") {
+      return app.kind.includes(categoryValue);
+    }
+    return true;
   }
 
   const buildCategoryDropdown = () => {
     const categoryMenuItems = [
       <SelectOption key="name" value="Name">Name</SelectOption>,
-      <SelectOption key="level" value="Namespace">Namespace</SelectOption>
+      <SelectOption key="namespace" value="Namespace">Namespace</SelectOption>,
+      <SelectOption key="kind" value="Kind">Kind</SelectOption>
     ];
 
     return (
       <ToolbarItem>
         <Select
+          selections={selectedCategory}
           onSelect={onCategorySelect}
           onToggle={onCategoryToggle}
           isOpen={isCategoryDropdownOpen}>
@@ -91,7 +107,7 @@ export const ApplicationList: React.FC<ApplicationListProps> = ({ apps }) => {
   const buildFilterDropdown = () => {
     return (
       <TextInputGroup>
-        <TextInputGroupMain icon={<SearchIcon />} value={inputValue} onChange={handleInputChange} />
+        <TextInputGroupMain icon={<SearchIcon />} value={categoryValue} onChange={handleCategoryValueChange} />
         {showUtilities && (
           <TextInputGroupUtilities>
             {showClearButton && (
@@ -141,11 +157,7 @@ export const ApplicationList: React.FC<ApplicationListProps> = ({ apps }) => {
 
 
   useEffect(() => {
-    //refresh 
-  },[apps])
-
-  // Sort the apps based on the current sort column and direction
-  const sortedApps = [...apps].sort((a, b) => {
+    const sorted = [...apps].filter(filterWithSelection).sort((a, b) => {
     if (sortColumn === "name") {
       return sortDirection === "asc"
         ? a.metadata.name.localeCompare(b.metadata.name)
@@ -177,129 +189,135 @@ export const ApplicationList: React.FC<ApplicationListProps> = ({ apps }) => {
     }
     return 0;
   });
+  setSortedApplications(sorted);
+  },[apps, sortColumn, sortDirection, setSelectedCategory, categoryValue]);
+
 
   return (
     <>
-      <Toolbar id="toolbar-with-chip-groups" clearAllFilters={onDelete} collapseListedFiltersBreakpoint="xl">
-        <ToolbarContent>
-          <ToolbarToggleGroup toggleIcon={<FilterIcon />} breakpoint="xl">
-            <ToolbarGroup
-              variant="filter-group"
-              style={{ lineHeight: '22px', alignItems: 'center' } as React.CSSProperties}>
-              {buildCategoryDropdown()}
-              {buildFilterDropdown()}
-            </ToolbarGroup>
-          </ToolbarToggleGroup>
-        </ToolbarContent>
-      </Toolbar>
+      {apps ? (<>
+        <Toolbar id="toolbar-with-chip-groups" clearAllFilters={onDelete} collapseListedFiltersBreakpoint="xl">
+          <ToolbarContent>
+            <ToolbarToggleGroup toggleIcon={<FilterIcon />} breakpoint="xl">
+              <ToolbarGroup
+                variant="filter-group"
+                style={{ lineHeight: '22px', alignItems: 'center' } as React.CSSProperties}>
+                {buildCategoryDropdown()}
+                {buildFilterDropdown()}
+              </ToolbarGroup>
+            </ToolbarToggleGroup>
+          </ToolbarContent>
+        </Toolbar>
 
-      <Table aria-label="Quarkus Application List">
-        <Thead>
-          <Tr>
-            <Th
-              onClick={() => toggleSort("name")}
-              className={sortColumn === "name" ? `sorted ${sortDirection}` : ""}
-            >
-              {columnNames.name}
+        <Table aria-label="Quarkus Application List">
+          <Thead>
+            <Tr>
+              <Th
+                onClick={() => toggleSort("name")}
+                className={sortColumn === "name" ? `sorted ${sortDirection}` : ""}
+              >
+                {columnNames.name}
 
-              <span className="pf-c-table__sort-indicator"/>
-              {sortColumn === "name" && (
-                <span className="sort-icon">{sortDirection === "asc" ? "▲" : "▼"}</span>
-              )}
-            </Th>
-            <Th
-              onClick={() => toggleSort("kind")}
-              className={sortColumn === "kind" ? `sorted ${sortDirection}` : ""}
-            >
-              {columnNames.kind}
+                <span className="pf-c-table__sort-indicator"/>
+                {sortColumn === "name" && (
+                  <span className="sort-icon">{sortDirection === "asc" ? "▲" : "▼"}</span>
+                )}
+              </Th>
+              <Th
+                onClick={() => toggleSort("kind")}
+                className={sortColumn === "kind" ? `sorted ${sortDirection}` : ""}
+              >
+                {columnNames.kind}
 
-              <span className="pf-c-table__sort-indicator"/>
-              {sortColumn === "kind" && (
-                <span className="sort-icon">{sortDirection === "asc" ? "▲" : "▼"}</span>
-              )}
-            </Th>
-            <Th
-              onClick={() => toggleSort("namespace")}
-              className={sortColumn === "namespace" ? `sorted ${sortDirection}` : ""}
-            >
-              {columnNames.namespace}
-              {sortColumn === "namespace" && (
-                <span className="sort-icon">{sortDirection === "asc" ? "▲" : "▼"}</span>
-              )}
-            </Th>
-            <Th
-              onClick={() => toggleSort("status")}
-              className={sortColumn === "status" ? `sorted ${sortDirection}` : ""}
-            >
-              {columnNames.status}
-              {sortColumn === "status" && (
-                <span className="sort-icon">{sortDirection === "asc" ? "▲" : "▼"}</span>
-              )}
-            </Th>
-            <Th
-              onClick={() => toggleSort("cpu")}
-              className={sortColumn === "cpu" ? `sorted ${sortDirection}` : ""}
-            >
-              {columnNames.cpu}
-              {sortColumn === "cpu" && (
-                <span className="sort-icon">{sortDirection === "asc" ? "▲" : "▼"}</span>
-              )}
-            </Th>
-            <Th
-              onClick={() => toggleSort("memory")}
-              className={sortColumn === "memory" ? `sorted ${sortDirection}` : ""}
-            >
-              {columnNames.memory}
-              {sortColumn === "memory" && (
-                <span className="sort-icon">{sortDirection === "asc" ? "▲" : "▼"}</span>
-              )}
-            </Th>
-            <Th
-              onClick={() => toggleSort("created")}
-              className={sortColumn === "created" ? `sorted ${sortDirection}` : ""}
-            >
-              {columnNames.created}
-              {sortColumn === "created" && (
-                <span className="sort-icon">{sortDirection === "asc" ? "▲" : "▼"}</span>
-              )}
-            </Th>
-            <Th></Th>
-          </Tr>
-        </Thead>
-        <Tbody>
-          {sortedApps && sortedApps.filter(app => app.metadata && app.metadata.name && app.metadata.namespace).map((app, index) => (
-            <Tr key={app.metadata.name}>
-              <Td dataLabel={columnNames.name}>
-                <Link to={applicationUrl(app)}>
-                  {app.metadata.name}
-                </Link>
-              </Td>
-              <Td dataLabel={columnNames.kind}>{app.kind}</Td>
-              <Td dataLabel={columnNames.namespace}>{app.metadata.namespace}</Td>
-              <Td dataLabel={columnNames.status}><Status title={`${app.status.availableReplicas} of ${app.status.replicas} pods`} status={app.status.availableReplicas === app.status.replicas ? "Succeeded" : "Failed"}/></Td>
-              <Td dataLabel={columnNames.cpu}>{app.cpu}</Td>
-              <Td dataLabel={columnNames.memory}>{app.memory}</Td>
-              <Td dataLabel={columnNames.created}>{calculateTimeDifference(app.metadata.creationTimestamp)} ago</Td>
-              <Td dataLabel="Action">
-                <div className="dropdown">
-                     <Dropdown
-                    onSelect={() => onSelectAction(selectedActions[index], index)}
-                    isOpen={openStates[index]}
-                    toggle={
+                <span className="pf-c-table__sort-indicator"/>
+                {sortColumn === "kind" && (
+                  <span className="sort-icon">{sortDirection === "asc" ? "▲" : "▼"}</span>
+                )}
+              </Th>
+              <Th
+                onClick={() => toggleSort("namespace")}
+                className={sortColumn === "namespace" ? `sorted ${sortDirection}` : ""}
+              >
+                {columnNames.namespace}
+                {sortColumn === "namespace" && (
+                  <span className="sort-icon">{sortDirection === "asc" ? "▲" : "▼"}</span>
+                )}
+              </Th>
+              <Th
+                onClick={() => toggleSort("status")}
+                className={sortColumn === "status" ? `sorted ${sortDirection}` : ""}
+              >
+                {columnNames.status}
+                {sortColumn === "status" && (
+                  <span className="sort-icon">{sortDirection === "asc" ? "▲" : "▼"}</span>
+                )}
+              </Th>
+              <Th
+                onClick={() => toggleSort("cpu")}
+                className={sortColumn === "cpu" ? `sorted ${sortDirection}` : ""}
+              >
+                {columnNames.cpu}
+                {sortColumn === "cpu" && (
+                  <span className="sort-icon">{sortDirection === "asc" ? "▲" : "▼"}</span>
+                )}
+              </Th>
+              <Th
+                onClick={() => toggleSort("memory")}
+                className={sortColumn === "memory" ? `sorted ${sortDirection}` : ""}
+              >
+                {columnNames.memory}
+                {sortColumn === "memory" && (
+                  <span className="sort-icon">{sortDirection === "asc" ? "▲" : "▼"}</span>
+                )}
+              </Th>
+              <Th
+                onClick={() => toggleSort("created")}
+                className={sortColumn === "created" ? `sorted ${sortDirection}` : ""}
+              >
+                {columnNames.created}
+                {sortColumn === "created" && (
+                  <span className="sort-icon">{sortDirection === "asc" ? "▲" : "▼"}</span>
+                )}
+              </Th>
+              <Th></Th>
+            </Tr>
+          </Thead>
+          <Tbody>
+            {sortedApplications && sortedApplications.filter(app => app.metadata && app.metadata.name && app.metadata.namespace).map((app, index) => (
+              <Tr key={app.metadata.name}>
+                <Td dataLabel={columnNames.name}>
+                  <Link to={applicationUrl(app)}>
+                    {app.metadata.name}
+                  </Link>
+                </Td>
+                <Td dataLabel={columnNames.kind}>{app.kind}</Td>
+                <Td dataLabel={columnNames.namespace}>{app.metadata.namespace}</Td>
+                <Td dataLabel={columnNames.status}><Status title={`${app.status.availableReplicas} of ${app.status.replicas} pods`} status={app.status.availableReplicas === app.status.replicas ? "Succeeded" : "Failed"}/></Td>
+                <Td dataLabel={columnNames.cpu}>{app.cpu}</Td>
+                <Td dataLabel={columnNames.memory}>{app.memory}</Td>
+                <Td dataLabel={columnNames.created}>{calculateTimeDifference(app.metadata.creationTimestamp)} ago</Td>
+                <Td dataLabel="Action">
+                  <div className="dropdown">
+                    <Dropdown
+                      onSelect={() => onSelectAction(selectedActions[index], index)}
+                      isOpen={openStates[index]}
+                      toggle={
                       <DropdownToggle onToggle={() => onToggleActions(index)} aria-label="Action Menu">
                         <EllipsisVIcon />
                       </DropdownToggle>
                     }
-                    dropdownItems={actions.map((action) => (
-                      <DropdownItem key={action} className="mock">{action}</DropdownItem>
-                    ))}
-                  />
-                </div>
-              </Td>
-            </Tr>
-          ))}
-        </Tbody>
-      </Table>
+                      dropdownItems={actions.map((action) => (
+                        <DropdownItem key={action} className="mock">{action}</DropdownItem>
+                      ))}
+                      />
+                  </div>
+                </Td>
+              </Tr>
+            ))}
+          </Tbody>
+        </Table>
+        </>)
+        : <Spinner aria-label="Loading Quarkus Applications" />}
       </>
   );
 };
