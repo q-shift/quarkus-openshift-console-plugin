@@ -10,7 +10,7 @@ import {
 
 import { Application } from '../types';
 import Status from '@openshift-console/dynamic-plugin-sdk/lib/app/components/status/Status';
-import { consoleFetchJSON, ResourceLink } from '@openshift-console/dynamic-plugin-sdk';
+import { consoleFetch, consoleFetchJSON, ResourceLink } from '@openshift-console/dynamic-plugin-sdk';
 
 const ApplicationDetailsCard: React.FC<{ application: Application }> = ({ application }) => {
 
@@ -109,9 +109,9 @@ const ApplicationDetailsCard: React.FC<{ application: Application }> = ({ applic
     return application.status.replicas === application.status.availableReplicas ? "Succeeded" : "Failed";
   }
 
-  function checMetricsEndpointStatus(application: Application) {
+  function checkMetricsEndpointStatus(application: Application) {
     const metricsProxyUrl = (app) => `/api/proxy/plugin/quarkus-openshift-console-plugin/service-proxy/metrics/${app.metadata.namespace}/${app.metadata.name}/`
-    consoleFetchJSON(metricsProxyUrl(application)).then((res) => {
+    consoleFetch(metricsProxyUrl(application)).then((res) => {
       setMetricsEndpointStatus('Succeeded');
     }).catch((err) => {
         setMetricsEndpointStatus('Failed');
@@ -129,7 +129,7 @@ const ApplicationDetailsCard: React.FC<{ application: Application }> = ({ applic
 
   function checkProduiEndpointStatus(application: Application) {
     const produiProxyUrl = (app) => `/api/proxy/plugin/quarkus-openshift-console-plugin/service-proxy/produi/${app.metadata.namespace}/${app.metadata.name}/`
-    consoleFetchJSON(produiProxyUrl(application)).then((res) => {
+    consoleFetch(produiProxyUrl(application)).then((res) => {
       setProduiEndpointStatus('Succeeded');
     }).catch((err) => {
         setInfoEndpointStatus('Failed');
@@ -149,7 +149,7 @@ const ApplicationDetailsCard: React.FC<{ application: Application }> = ({ applic
       setHealthEndpoint(getHealthCheckEndpoint(application));
       setHealthEndpointStatus(getHealthStatus(application));
       setMetricsEndpoint("/q/metrics");
-      checMetricsEndpointStatus(application);
+      checkMetricsEndpointStatus(application);
       setInfoEndpoint("/q/info");
       checkInfoEndpointStatus(application);
       setProduiEndpoint("/q/dev");
