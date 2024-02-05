@@ -26,9 +26,7 @@ const ApplicationConfigurationCard: React.FC<{application: Application }> = ({ a
 
   useEffect(() => {
     Object.entries(envVars).forEach(([key, _]) => {
-      console.log('getting description of:' + key);
       fetchQuarkusConfigInfo(envVarToProperty(key)).then((description) => {
-        console.log('Description of:' + key + ' is ' + description);
         setDescriptions(prevDescriptions => ({
           ...prevDescriptions,
           [key]: description
@@ -54,15 +52,16 @@ const ApplicationConfigurationCard: React.FC<{application: Application }> = ({ a
     return envVar.toLowerCase().replace(/_/g, '.');
   }
 
+  /*
   function propertyToEnvVar(property: string): string {
     return property.toUpperCase().replace(/[^A-Z0-9]/g, '_');
   }
+  */
 
 
   async function fetchQuarkusConfigInfo(propertyName: string): Promise<string> {
     // Split the property to find the last segment which is usually the actual property name
-    const envVarName = propertyToEnvVar(propertyName);
-    console.log('Property:' + propertyName + ' -> ' + envVarName);
+   // const envVarName = propertyToEnvVar(propertyName);
 
     // Fetch the Quarkus configuration guide page
     const response = await fetch('https://quarkus.io/guides/all-config');
