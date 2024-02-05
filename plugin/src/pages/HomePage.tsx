@@ -14,7 +14,7 @@ import { useEffect, useState } from 'react';
 import { NamespaceBar } from '@openshift-console/dynamic-plugin-sdk';
 import ApplicationList from '../components/ApplicationList';
 import { Application } from '../types';
-import { fetchApplicationsWithMetrics } from '../services/QuarkusService';
+import { fetchDeployments, fetchDeploymentConfigs, populateAdddionalInfo } from '../services/QuarkusService';
 import ApplicationsCPUGraph from '../components/ApplicationsCPUGraph';
 import ApplicationsMemoryGraph from '../components/ApplicationsMemoryGraph';
 
@@ -25,10 +25,36 @@ export const QuarkusPage: React.FC<QuarkusHomePageProps> = ({ match }) => {
   const [activeNamespace, setActiveNamespace] = useState(ns || null);
   const [applications, setApplications] = useState<Application[]>([]);
 
+  const matching = (left: Application, right: Application) : boolean => {
+    return left.metadata.name === right.metadata.name && left.metadata.namespace === right.metadata.namespace && left.kind === right.kind;
+  }
+
   useEffect(() => {
-    fetchApplicationsWithMetrics(activeNamespace).then((apps: Application[]) => {
-      setApplications(apps);
-    })
+    fetchDeployments(activeNamespace).then((apps: Application[]) => {
+      apps.forEach(app => {
+       setApplications((existing: Application[]) => {
+             return [...existing.filter(e => !matching(e, app)) , app];
+           });
+        populateAdddionalInfo(app).then(appWithInfo => {
+          setApplications((existing: Application[]) => {
+             return [...existing.filter(e => !matching(e, appWithInfo)) , appWithInfo];
+           });         
+        });
+      })
+    });
+
+    fetchDeploymentConfigs(activeNamespace).then((apps: Application[]) => {
+      apps.forEach(app => {
+       setApplications((existing: Application[]) => {
+             return [...existing.filter(e => !matching(e, app)) , app];
+           });
+        populateAdddionalInfo(app).then(appWithInfo => {
+          setApplications((existing: Application[]) => {
+           return [...existing.filter(e => !matching(e, appWithInfo)) , appWithInfo];
+           });         
+        });
+      })
+    });
   }, [activeNamespace]);
   
   return (

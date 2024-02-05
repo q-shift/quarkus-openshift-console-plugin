@@ -6,7 +6,7 @@ import { quarkusApplicationStore } from '../state';
 
 const OPENSHIFT_RUNTIME = 'app.openshift.io/runtime';
 
-async function fetchDeployments(ns: string): Promise<Application[]>  {
+export async function fetchDeployments(ns: string): Promise<Application[]>  {
   let deploymentsUri = ns ? '/api/kubernetes/apis/apps/v1/namespaces/' + ns + '/deployments' : '/api/kubernetes/apis/apps/v1/deployments';
   return consoleFetchJSON(deploymentsUri).then(res => {
     return res.items
@@ -34,7 +34,7 @@ async function deleteDeployment(ns: string, name: string): Promise<boolean>  {
   });
 }
 
-async function fetchDeploymentConfigs(ns: string): Promise<Application[]> {
+export async function fetchDeploymentConfigs(ns: string): Promise<Application[]> {
   let deploymentConfigUri = ns ? '/api/kubernetes/apis/apps.openshift.io/v1/namespaces/' + ns + '/deploymentconfigs' : '/api/kubernetes/apis/apps.openshift.io/v1/deploymentconfigs';
   return consoleFetchJSON(deploymentConfigUri).then(res => {
     return res.items
@@ -102,7 +102,7 @@ export async function fetchJob(ns: string, name: string): Promise<JobKind>  {
   });
 }
 
-async function populateAdddionalInfo(app: Application): Promise<Application>  {
+export async function populateAdddionalInfo(app: Application): Promise<Application>  {
   return populateCpu(app).then(populateCpuMetrics).then(populateMem).then(populateMemMetrics).then(populateRoute);
 }
 
@@ -326,6 +326,8 @@ export async function deleteApplicationPods(ns: string, name: string) {
 }
 
 const QuarkusService = {
+  fetchDeployments,
+  fetchDeploymentConfigs,
   fetchApplications,
   fetchApplicationPods,
   fetchApplicationsWithMetrics,
@@ -343,6 +345,7 @@ const QuarkusService = {
   deleteDeployment,
   deleteDeploymentConfig,
   deleteApplication,
-  deleteApplicationPods
+  deleteApplicationPods,
+  populateAdddionalInfo
 }
 export default QuarkusService;
