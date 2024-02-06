@@ -84,6 +84,28 @@ const ApplicationDetailsCard: React.FC<{ application: Application }> = ({ applic
     return null;
   }
 
+function convertGitUrlToHttp(gitUrl: string): string {
+    if (!gitUrl) {
+      
+    }
+    // Regular expressions to match SSH and other non-HTTP Git URLs for GitHub and GitLab
+    const githubSshRegex = /^(git@github\.com:)([^#]+)/;
+    const gitlabSshRegex = /^(git@gitlab\.com:)([^#]+)/;
+    
+    // Check if the URL is a GitHub SSH URL
+    if (githubSshRegex.test(gitUrl)) {
+        return gitUrl.replace(githubSshRegex, 'https://github.com/$2');
+    }
+    
+    // Check if the URL is a GitLab SSH URL
+    if (gitlabSshRegex.test(gitUrl)) {
+        return gitUrl.replace(gitlabSshRegex, 'https://gitlab.com/$2');
+    }
+
+    // If it's already an HTTP URL or another form, return as is
+    return gitUrl;
+}
+
   function getBuildTimestamp(application: Application): string | null {
     if (application && application.metadata) {
       return application.metadata.annotations["app.quarkus.io/build-timestamp"];
@@ -129,12 +151,14 @@ const ApplicationDetailsCard: React.FC<{ application: Application }> = ({ applic
 
   function checkProduiEndpointStatus(application: Application) {
     const produiProxyUrl = (app) => `/api/proxy/plugin/quarkus-openshift-console-plugin/service-proxy/produi/${app.metadata.namespace}/${app.metadata.name}/`
-    consoleFetch(produiProxyUrl(application)).then((res) => {
+    consoleFetchJSON(produiProxyUrl(application)).then((res) => {
       setProduiEndpointStatus('Succeeded');
     }).catch((err) => {
-        setInfoEndpointStatus('Failed');
+        setProduiEndpointStatus('Failed');
       });
   }
+
+
 
   useEffect(() => {
     const quarkusVersion = getQuarkusVersion(application);
@@ -196,10 +220,12 @@ const ApplicationDetailsCard: React.FC<{ application: Application }> = ({ applic
                   linkTo={true}/>
                 {version && <TextContent><strong>Version:</strong> {version}</TextContent>}
                 {buildTimestamp && <TextContent><strong>Build Timestamp:</strong> {buildTimestamp}</TextContent>}
-                {vcsUri && <TextContent><strong>Version Control:</strong> {vcsUri}</TextContent>}
+                {vcsUri && 
+                  <TextContent><strong>Version Control: </strong> 
+                    <a href={convertGitUrlToHttp(vcsUri)} target="_blank" rel="noopener noreferrer">{vcsUri}</a>
+                  </TextContent>}
                 <TextContent>
-                  <strong>Location:</strong>
-                  <a href={location} target="_blank" rel="noopener noreferrer">
+                  <strong>Location:</strong> <a href={location} target="_blank" rel="noopener noreferrer">
                     {location}
                   </a>
                 </TextContent>

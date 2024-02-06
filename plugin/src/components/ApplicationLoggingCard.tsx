@@ -30,7 +30,7 @@ import { useEffect, useState } from 'react';
 import { Application } from '../types';
 import ApplicationLogViewer from './ApplicationLogViewer';
 
-const ApplicationLoggingCard: React.FC<{application: Application }> = ({ application }) => {
+const ApplicationLoggingCard: React.FC<{application: Application, active?: boolean }> = ({ application, active }) => {
 
   interface Logger {
     name: string;
@@ -125,7 +125,7 @@ const ApplicationLoggingCard: React.FC<{application: Application }> = ({ applica
             <TabContent id="0" title="Logs">
               <PageSection variant="light">
                 {application && application.metadata &&
-                <ApplicationLogViewer application={application} containerName={application.metadata.name} /> }
+                <ApplicationLogViewer application={application} containerName={application.metadata.name} active={active && activeTabKey === 0} /> }
               </PageSection>
             </TabContent>
           </Tab>

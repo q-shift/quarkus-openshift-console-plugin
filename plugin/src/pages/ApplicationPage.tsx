@@ -22,6 +22,7 @@ import ApplicationLoggingCard from '../components/ApplicationLoggingCard';
 import ApplicationConfigurationCard from '../components/ApplicationConfigurationCard';
 import ApplicationProdUiCard from '../components/ApplicationProdUiCard';
 import './quarkus.css';
+import { consoleFetchJSON } from '@openshift-console/dynamic-plugin-sdk';
 
 export const ApplicationPage: React.FC<ApplicationPageProps> = ( {match} ) => {
   const { t } = useTranslation('plugin__console-plugin-template');
@@ -32,6 +33,8 @@ export const ApplicationPage: React.FC<ApplicationPageProps> = ( {match} ) => {
   const [application, setApplication] = useState<Application>();
   const [activeTabKey, setActiveTabKey] = useState(0);
 
+  const [produiAvailable, setProduiAvailable] = useState<boolean>(false);
+
   const handleTabClick = (event, tabIndex) => {
     setActiveTabKey(tabIndex);
   };
@@ -41,6 +44,21 @@ export const ApplicationPage: React.FC<ApplicationPageProps> = ( {match} ) => {
       setApplication(app);
     })
   }, [selectedNamespace, selectedKind, selectedName]);
+
+  useEffect(() => {
+    if (application) {
+      checkProdui(application);
+    }
+  }, [application]);
+
+  function checkProdui(application: Application) {
+    const produiProxyUrl = (app) => `/api/proxy/plugin/quarkus-openshift-console-plugin/service-proxy/produi/${app.metadata.namespace}/${app.metadata.name}/`
+    consoleFetchJSON(produiProxyUrl(application)).then((res) => {
+      setProduiAvailable(true);
+    }).catch((err) => {
+        setProduiAvailable(false);
+      });
+  }
   
   return (
     <>
@@ -84,15 +102,15 @@ export const ApplicationPage: React.FC<ApplicationPageProps> = ( {match} ) => {
             <Tab eventKey={4} title={<TabTitleText>Logging</TabTitleText>}>
               <TabContent id="4" title="Logging">
                 <PageSection variant="light">
-                  <ApplicationLoggingCard application={application} />
+                  <ApplicationLoggingCard application={application} active={activeTabKey === 4} />
                 </PageSection>
               </TabContent>
             </Tab>
-            {application && application.url &&
+            {application && application.url && produiAvailable &&
             <Tab eventKey={5} title={<TabTitleText>Prod UI</TabTitleText>}>
               <TabContent id="5" title="Prod UI">
                 <PageSection variant="light">
-                  <ApplicationProdUiCard application={application} />
+                  <ApplicationProdUiCard application={application}/>
                 </PageSection>
               </TabContent>
             </Tab>

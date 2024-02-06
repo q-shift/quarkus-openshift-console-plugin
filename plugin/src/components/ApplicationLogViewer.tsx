@@ -21,7 +21,7 @@ import { Application } from '../types';
 import { PodKind } from '../k8s-types';
 import { fetchApplicationPods, fetchPodsLogs } from '../services/QuarkusService';
 
-const ApplicationLogViewer: React.FC<{ application: Application, containerName?: string }> = ({ application, containerName }) => {
+const ApplicationLogViewer: React.FC<{ application: Application, containerName?: string, active?: boolean}> = ({ application, containerName, active }) => {
 
   const [pods, setPods] = React.useState<PodKind[]>([]);
   const [podNames, setPodNames] = React.useState([]);
@@ -37,6 +37,14 @@ const ApplicationLogViewer: React.FC<{ application: Application, containerName?:
   const logViewerRef = React.useRef<any>();
 
   const [isPodDropdownOpen, setIsPodDropdownOpen] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!active) {
+      setItemCount(1);
+      setCurrentItemCount(0);
+      window.clearInterval(timer);
+    }
+  }, [active]);
 
   React.useEffect(() => {
     if (application && application.metadata) {
@@ -61,6 +69,9 @@ const ApplicationLogViewer: React.FC<{ application: Application, containerName?:
 
 
   React.useEffect(() => {
+    if (content.length === 0) {
+      return;
+    }
     setTimer(
       window.setInterval(() => {
         setItemCount(itemCount => itemCount + 1);
@@ -69,12 +80,13 @@ const ApplicationLogViewer: React.FC<{ application: Application, containerName?:
     return () => {
       window.clearInterval(timer);
     };
-  }, [content]);
+  }, [active, content]);
 
 
   React.useEffect(() => {
     if (itemCount > content.length) {
       window.clearInterval(timer);
+      setBuffer(content);
     } else {
       setBuffer(content.slice(0, itemCount));
     }
@@ -85,7 +97,6 @@ const ApplicationLogViewer: React.FC<{ application: Application, containerName?:
       setCurrentItemCount(buffer.length);
       setRenderData(buffer.join('\n'));
       if (logViewerRef && logViewerRef.current) {
-        //TODO: Fix the commented line below 
         logViewerRef.current.scrollToBottom();
       }
     }
